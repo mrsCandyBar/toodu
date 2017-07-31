@@ -1,0 +1,55 @@
+<article class="contentHolder">
+
+	<h1 style="padding-bottom: 0px">TOODU</h1>
+
+	<section ng-show="!isSignedIn">
+
+		<ul class="pagination">
+          	<li class="{{ hasAccount ? 'active' : '' }}">
+            	<a class="{{ hasAccount ? 'active' : '' }}" ng-click="hasAccount = true">
+					Login
+             		</a></li>
+
+           	<li class="{{ hasAccount ? '' : 'active' }}">
+            	<a class="{{ hasAccount ? '' : 'active' }}" ng-click="hasAccount = false">
+					Create an Account
+             		</a></li>
+        </ul>
+
+		<form>
+			<div class="input-group" ng-show="!hasAccount">
+				<input type="text" class="form-control" ng-model="user.name" placeholder="Name">
+				<span class="input-group-addon">Name</span>
+			</div>
+
+			<div class="input-group">
+				<input type="email" class="form-control" ng-model="user.email" placeholder="Email">
+				<span class="input-group-addon">Email address</span>
+			</div>
+
+			<div class="input-group">
+				<input type="password" class="form-control" ng-model="user.password" placeholder="Password">
+				<span class="input-group-addon">Password</span>
+			</div>
+
+			<div class="input-group" ng-show="!hasAccount">
+				<input type="text" class="form-control" ng-model="user.organisation" placeholder="Org Name">
+				<span class="input-group-addon">Organisation</span>
+			</div>
+
+			<div class="checkbox" ng-show="!hasAccount">
+				<label><input type="checkbox" name="admin" ng-model="user.admin"> Make me admin</label>
+			</div>
+
+			<small ng-bind="error" ng-show="error" class="error"></small>
+
+			<button type="submit" class="btn btn-primary" ng-click="submit(hasAccount)"><span ng-bind="action"></span></button>
+		  
+		</form>
+	</section>
+
+	<section ng-show="isSignedIn">
+		<button class="btn btn-lg btn-primary" ng-click="logout()">log out</button>
+	</section>
+
+</article>

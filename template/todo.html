@@ -1,0 +1,128 @@
+<article class="contentHolder">
+
+  <ul class="pagination">
+    <li><a onclick="history.back()">Back</a></li>
+    <li><a  ng-if="isAdmin" 
+            ng-show="!editable && todo.status === 'Done'" 
+            ng-click="moveTodo()">
+              {{ todo.isActive === true ? 'Archive' : 'Activate' }}</a></li>
+
+    <li><a  ng-if="isAdmin" 
+            ng-show="!editable" 
+            ng-click="deleteTodo()">
+              Delete</a></li>
+  </ul>
+
+
+  <!-- Visible on page when not in edit state -->
+  <h1 ng-show="!editable && isAdmin || !isAdmin">
+    <em>
+      {{ todo.title }} 
+      <small>({{ todo.urgency }})</small>
+    </em>
+
+    <small><br>
+      {{ taskDates.total }}
+      <small><br>Assigned to : {{ todo.username }} ({{ todo.status }})</small>
+    </small>
+  </h1>
+  <p ng-show="!editable && isAdmin || !isAdmin">{{ todo.description }}</p>
+
+
+  <!-- only visible in edit state -->
+  <div ng-if="isAdmin" ng-show="editable" class="editTodo">
+
+    <section class="editTodo__duration">
+      <datepicker info="todo.dateStart"></datepicker> 
+      &nbsp;&nbsp; To &nbsp;&nbsp; <datepicker info="todo.dateEnd"></datepicker>
+    </section>
+
+    <h1 class="editTodo__title">
+      <p ng-model="todo.title" contenteditable="true"> {{ todo.title }}</p>
+    </h1>
+
+    <section class="container editTodo__dropdowns">
+      <div class="row">
+
+        <div> Status </div>
+        <div class="form-group">
+          <p>{{ todo.status }}</p>
+          <div class="form-group editTodo__dropdowns__menu">
+            <span ng-repeat="state in todoStates.status">
+              <input type="radio" name="Status" value="{{ state }}" 
+                ng-model="todo.status">{{ state }}<br>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div> Urgency </div>
+        <div class="form-group">
+          <p>{{ todo.urgency }}</p>
+          <div class="form-group editTodo__dropdowns__menu">
+              <span ng-repeat="state in todoStates.urgency">
+                <input type="radio" name="Urgency" value="{{ state }}" 
+                  ng-model="todo.urgency"> {{ state }}<br>
+              </span>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div> User </div>
+        <div class="form-group">
+          <p>{{ todo.username }}</p>
+          <div class="form-group editTodo__dropdowns__menu">
+              <span ng-repeat="user in allUsers">
+                <input type="radio" name="User" value="{{ user }}" 
+                  ng-model="todo.user"> {{ user.name }}<br>
+              </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <p ng-model="todo.description" contenteditable="true"> {{ todo.description }}</p>
+  </div>
+
+  
+  <!-- Comments section -->
+  <section class="contentHolder__comments" ng-show="isAdmin && todo.comments || !isAdmin">
+    <span>{{todoList.comments.length}} comments</span>
+    <ul 
+      ng-show="todo.comments"
+      class="unstyled">
+      <li ng-repeat="comment in todo.comments">
+        <h5>{{ comment.name }} said</h5>
+        <p>{{ comment.message }}</p>
+
+         <!-- Reply to response -->
+        <ul class="unstyled">
+          <li ng-repeat="reply in comment.reply">
+            <h5>{{ reply.name }} said</h5>
+            <p>{{ reply.message }}</p>
+          </li>
+        </ul>
+
+        <article>
+          <h5>reply</h5>
+          <textarea ng-model="reply[comment.id].message" class="form-control"></textarea>
+          <button ng-click="replyToComment(comment.id)" class="btn btn-sm btn-default">Reply</button>
+        </article>
+      </li>
+    </ul>
+
+    <article>
+      <br><br>
+      <h5>Comment from : {{ comment.name }}</h5>
+      <textarea ng-model="comment.message" class="form-control"></textarea>
+      <button ng-click="addComment()" class="btn btn-sm btn-default">Comment</button>
+    </article>
+  </section>
+  <!-- /comments section -->
+
+  <br><br>
+  <button class="btn btn-primary" ng-click="update()">{{ editable ? 'Save' : 'Edit' }}</button>
+  <button ng-show="editable" class="btn btn-primary" ng-click="cancel()">cancel</button>
+
+</article>

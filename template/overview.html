@@ -1,0 +1,51 @@
+<article class="contentHolder">
+
+	<!-- <h1 ng-show="user.name">
+		<small>Welcome</small>
+		<span>{{ user.name }}</span>
+		<small ng-show="user.admin"><i>(admin)</i></small><br> 
+		<small>{{ user.email }}</small><br>
+		<small>org: {{ user.organisation }}</small>
+	</h1> -->
+
+
+
+	<h1 
+		ng-show="taskList.todos && taskList.todos.length > 0" 
+		class="ucase">
+			Task List
+			<a  ng-show="user.admin && taskList.todos" 
+			 	href="index.html#!/create" 
+			 	class="btn btn-primary">create task</a></h1>
+
+	<section class="contentHolder__btn-holder" ng-show="taskList.todos && taskList.todos.length > 0">
+
+		<span ng-show="taskList.todos.length > 6">
+			Filter 
+			<a 	ng-repeat="filter in taskList.filters"
+				class="btn btn-sm btn-default {{ current.params.filter === filter ? 'active' : ''}}" 
+				href="index.html#!/overview/{{ filter }}">
+				{{ filter }}
+			</a>
+		
+			<br><br>
+		</span>
+
+		<ul class="taskList">
+			<li ng-repeat="todo in taskList.todos" class="taskList__holder" ng-click="goTo('todo/' + todo.id)">
+				
+				<a 	class="taskList__holder--title status__{{ todo.status}} urgency__{{ todo.urgency }}">
+					{{ todo.title }}
+				</a><br>
+
+				<div ng-show="user.admin" class="taskList__holder--user status__{{ todo.status }} urgency__{{ todo.urgency }}">
+					{{ todo.username }} 
+					(<i>{{ todo.status }}</i>) </div>
+			</li>
+		</ul>
+	</section>
+
+	<h3 ng-show="taskList.todos.length === 0"><br>No Todos</h3>
+	<h3 ng-show="!taskList.todos"><br>Loading</h3>
+
+</article>

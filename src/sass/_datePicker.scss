@@ -1,0 +1,60 @@
+.dp__holder {
+	display: inline-block;
+
+	ul {
+		display: block;
+		width: 100%;
+		margin: 0px; padding: 0px;
+
+		li {
+			list-style: none;
+			border: 1px solid #efefef;
+			display: inline-block;
+
+			:hover { text-decoration: none; }
+		}
+		
+		.active {
+			color: #fff;
+			background: #333;
+		}
+	}
+
+	.dp__dateYear {
+		background: #fff;
+		border: 1px solid #aaa;
+		margin-bottom: 20px;
+		li { 
+			width: calc(100% / 4);
+			text-align: center;
+		}
+	}
+	.dp__dateTitle {
+		background: #fff;
+		border: 1px solid #aaa;
+		margin-bottom: 20px;
+		li { width: calc(100% / 3) }
+	}
+	.dp__dateDay {
+		border: 1px solid #aaa;
+		border-bottom: none;
+		background: #000;
+		text-transform: uppercase; 
+		text-align: center;
+
+		li { width: calc(100% / 7); padding: 3px 0px 4px; border: none; }
+		a { color: #fff; font-size: 85%; text-decoration: none; cursor: default; }
+	}
+	.dp__dateMonth__holder {
+		background: #fff;
+		border: 1px solid #aaa;
+		text-align: left;
+
+		li { 
+			text-align: center;
+			width: calc(100% / 7);
+			line-height: 25px;
+			cursor: pointer;
+		}
+	}
+}

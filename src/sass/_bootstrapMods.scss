@@ -1,0 +1,33 @@
+$darkBlue	: #2E6BA0;
+$blue		: #367EBC;
+.nav-pills, .pagination {
+	background: $darkBlue;
+	border-bottom: 3px solid $darkBlue;
+
+	li {
+		a { 
+			background: $blue;
+			border: none; 
+			color: #fff; 
+			cursor: pointer;
+		}
+
+		&:hover a { opacity: 0.5; background: none; color: #fff; }
+		&.active a { background: none !important; }
+		&:hover.active a { background: none; opacity: 1; cursor: default; }
+	}
+}
+
+.nav-pills {
+	border-radius: 0px 0px 5px 5px;
+
+	li a 				{ border-radius: 0px; }
+	li:last-child a  	{ border-radius: 0px 0px 5px 0px; }
+	li:first-child a 	{ border-radius: 0px 0px 0px 5px; }
+}
+
+.btn-primary { 
+	background: $blue;
+	border: none;
+	border-bottom: 3px solid $darkBlue;
+}
