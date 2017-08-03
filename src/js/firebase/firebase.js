@@ -104,56 +104,18 @@ class Firebase {
     return dataRetrieved
   }
 
-  retrieveTasks(activity) {
-    let setupTasks = new Promise((resolve, reject) => {
-      this._retrieveTasks(activity).then((tasks) => {
-        if (tasks) {
-          this.tasks = tasks;
-          window.sessionStorage.tasks = JSON.stringify(tasks);
-        }
-        resolve('Page setup complete');
-        
-      }, (error) => {
-        console.log('data >>> error', error);
-      });
+  retrieveTasks($rootScope, activity) {
+    this.database
+      .ref('/' + activity)
+      .orderByChild(this.searchFilters.filter)
+      .equalTo(this.searchFilters.value)
+      .on('value', function(snapshot) {
+        let updates = snapshot.val() ? snapshot.val() : [];
+        $rootScope.$broadcast('userTasksUpdated', updates);
+
+      }, function(err) {
+      console.log('denied >>>', err);
     });
-
-    return setupTasks;
-  }
-
-    _retrieveTasks(location) {
-      let dataRetrieved = new Promise((resolve, reject) => {
-        Query.dataAndsubscribeToUpdatesForSpecificResults(this.database, '/' + location, this.searchFilters.filter, this.searchFilters.value).then((data) =>{
-          resolve(data);
-
-        }, (error) => {
-          reject(error);
-        });
-      });
-
-      return dataRetrieved
-    }
-
-  taskUpdate(location) {
-    let taskData = new Promise((resolve, reject) => {
-      this._retrieveTasks(location).then((tasks) => {
-
-        console.log('tasks >>>', tasks);
-        let updated = _hasListBeenUpdated(this.tasks, tasks);
-        if (updated) {
-          this.tasks = tasks;
-          window.sessionStorage.tasks = JSON.stringify(tasks);
-          resolve('Tasks Updated');
-        }
-        reject('No changes to task data');
-
-      }, (error) => {
-        console.log('tasks >>>', error);
-        reject('User data found but no tasks');
-      });
-    })
-
-    return taskData;
   }
 
   retrieveUsers() {
@@ -186,7 +148,6 @@ class Firebase {
     if (!this.tasks) { this.tasks = {} };
     this.tasks[taskData.id] = taskData;
     Command.updateTask(this.database, taskData.id, taskData, '');
-    
   }
 
   moveTask(taskData, location) {

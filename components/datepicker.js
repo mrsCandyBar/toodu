@@ -8,7 +8,16 @@ angular.module('datePickerComponent', [])
       	scope: {
       		newDate: '=info'
       	},
-      	controller: function($scope, $element) {
+      	controller: function($scope) {
+
+      		document.getElementById("main").onclick = function () {
+      			if ($scope.menuStatus === 'isOpen') {
+      				$scope.menuStatus = 'isClosed';
+      				$scope.dp__Controls['openSelection'] =  '';
+      			}
+      		};
+
+      		$scope.menuStatus = 'isClosed';
 
 	      	$scope.dp_createDays = function(monthTitle, amount) {
 				let month = {
@@ -56,10 +65,10 @@ angular.module('datePickerComponent', [])
 				dateSelection: ['year','month','day'],
 				openSelection: ''
 			}
+			
 
 			
 			if ($scope.newDate) {
-				console.log('date >>>', $scope.newDate);
 				let date = $scope.newDate.split('-')
 				$scope.dp__Controls['selected']['year'] 	= parseInt(date[0]);
 				$scope.dp__Controls['selected']['month'] 	= parseInt(date[1]);
@@ -75,6 +84,8 @@ angular.module('datePickerComponent', [])
 			);
 			
 			$scope.dp_showOptions = function(option) {
+				$scope.menuStatus = 'isOpen';
+
 				if ($scope.dp__Controls['openSelection'] === option) {
 					$scope.dp__Controls['openSelection'] =  '';
 				} else {
@@ -96,11 +107,13 @@ angular.module('datePickerComponent', [])
 		        		$scope.dp__Controls['selected']['day'] = value;
 		        	}
 
-		          _dp_update();
+		          	_dp_update();
 		      	}
 	        }
 
 	        function _dp_update() {
+	        	$scope.menuStatus = 'isClosed';
+
 	        	let createDate = '';
 	        	createDate += $scope.dp__Controls['selected']['year'] + '-';
 	        	createDate += $scope.dp__Controls['selected']['month'] < 10 ? '0' + $scope.dp__Controls['selected']['month'] + '-': $scope.dp__Controls['selected']['month'] + '-';

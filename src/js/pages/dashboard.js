@@ -1,34 +1,31 @@
+import Create from './todo_create.js';
 
 class Dashboard {
 
-	init(Firebase, TodoControls, $scope, $route, $location, activity) {
+	init(Firebase, TodoControls, $scope, $route, $location, activity, $rootScope, uuid) {
+
+		let createObj = new Create(TodoControls, $scope, $route, uuid, Firebase);
+		$scope.myObj = createObj;
+
 		if (Firebase.userID) {
-			if (!Firebase.user) {
-				Firebase.retrieveUserInfo().then(() => {
-					Firebase.retrieveTasks(activity).then((resolve) => {
-						_redirect($route);
-
-					}, (error) => {
-						alert('Oops something went wrong... this is awkward', error);
-					});
-				});
-
-			} else {
+			Firebase.retrieveUserInfo().then(() => {
 				$scope.user = Firebase.user;
-				$scope.taskList = TodoControls.retrieveTodos($scope, $route, Firebase);
-			
-				Firebase.taskUpdate(activity).then((response) => {
-					_redirect($route);
-					
-				}, (reject) => { 
-					console.log('No updates to Task Data recieved'); 
-				})
-			}
+				Firebase.retrieveTasks($rootScope, activity);
+			});
 		}	
 
 		$scope.goTo = function(route) {
 			_redirect($route, $location, route);
 		}
+
+		$scope.$on('userTasksUpdated', function(event, data){
+			Firebase.tasks = data;
+			let updateTasks = TodoControls.retrieveTodos($scope, $route, Firebase);
+
+			$scope.$apply(function () { 
+				$scope.taskList = updateTasks;
+            });
+        });
 	}
 }
 

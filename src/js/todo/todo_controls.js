@@ -29,7 +29,7 @@ class TodoControls {
 	    return $scope.todo;
     }
 
-    createTodo($route, uuid, user) {
+    createTodo(uuid, user) {
     	let todo = _retrieve('single', []);
     	todo.id = uuid;
     	todo.organisation = user.organisation;

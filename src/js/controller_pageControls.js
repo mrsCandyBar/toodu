@@ -15,12 +15,6 @@ class Pages {
 		$scope.logout = function() { homeObj.logout(Firebase); }
 	};
 
-	about($scope) {
-		$scope.heading 		= 'Why go Modular?';
-		$scope.description 	= 'Modular programming is a software design technique that emphasizes separating the functionality of a program into independent, interchangeable modules, such that each contains everything necessary to execute only one aspect of the desired functionality.';
-		$scope.quote 		= 'In object-oriented programming, the use of interfaces as an architectural pattern to construct modules is known as interface-based programming - Modular Programming found on Wikipedia';
-	};
-
 	todo($scope, $route, $location, Firebase, TodoControls, uuidGen) {
 		let todoObj = new Todo($scope, $route, Firebase, TodoControls);
 		$scope = _buildScope(todoObj, $scope);

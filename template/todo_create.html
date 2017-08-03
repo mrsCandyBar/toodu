@@ -1,63 +1,37 @@
 <article class="contentHolder">
 
-	<button class="btn btn-primary" onclick="history.back()">Back</button>
+	<div class="editTodo">
 
-	<h2>Create Todo</h2>
-
-	<form>
-
-		<div class="form-group">
-			<label for="Title">Title</label>
-			<input class="form-control" id="Title" 
-				placeholder="Title goes here..." 
-				ng-model="todo.title">
-		</div>
-
-		<div class="form-group">
-			<label for="Description">Description</label>
-			<textarea class="form-control" id="Description" 
-				placeholder="Description for task goes here..." 
-				ng-model="todo.description"></textarea>
-		</div>
-
-		<div class="form-group">
-			<label for="Description">Start Date</label>
+		<section class="editTodo__duration">
 			<datepicker info="todo.dateStart"></datepicker>
-		</div>
+			&nbsp;&nbsp; To &nbsp;&nbsp; <datepicker info="todo.dateEnd"></datepicker>
+		</section>
 
-		<div class="form-group">
-			<label for="Description">End Date</label>
-			<datepicker info="todo.dateEnd"></datepicker>
-		</div>
+		<h1 class="editTodo__title">
+			<p ng-model="todo.title" contenteditable="true"> {{ todo.title }}</p>
+		</h1>
 
-		<div class="contentHolder__form__radioHolder">
-			<div class="form-group col">
-				<label for="Status">Status</label><br>
-			  	<span ng-repeat="status in todoStates.status">
-					<input type="radio" name="Status" value="{{ status }}" 
-						ng-model="todo.status"> {{ status }}<br>
-				</span>
-		  	</div>
+		<section class="container editTodo__dropdowns">
+          <div class="row">
+            <div> Status </div>
+            <dropdown options="todoStates.status" selected="todo.status"></dropdown>
+          </div>
 
-		  	<div class="form-group col">
-				<label for="Urgency">Urgency</label><br>
-			  	<span ng-repeat="urgency in todoStates.urgency">
-					<input type="radio" name="Urgency" value="{{ urgency }}" 
-						ng-model="todo.urgency"> {{ urgency }}<br>
-				</span>
-		  	</div>
+          <div class="row">
+            <div> Urgency </div>
+            <dropdown options="todoStates.urgency" selected="todo.urgency"></dropdown>
+          </div>
 
-		  	<div class="form-group col" ng-show="allUsers.length > 0">
-				<label for="User">User</label><br>
-				<span ng-repeat="user in allUsers">
-					<input type="radio" name="User" value="{{ user }}" 
-						ng-model="todo.user"> {{ user.name }}<br>
-				</span>
-		  	</div>
-	  	</div>
+          <div class="row" ng-show="allUsers">
+            <div> User </div>
+            <dropdown options="allUsers" selected="todo.user"></dropdown>
+          </div>
+        </section>
 
-		<button type="submit" class="btn btn-primary" ng-click="submit();">Submit</button>
-	  
-	</form>
+		<p ng-model="todo.description" contenteditable="true"> {{ todo.description }}</p>
+	</div>
+
+	<br><br>
+	<button class="btn btn-primary" ng-click="submit()">Save</button>
 
 </article>

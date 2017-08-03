@@ -35,52 +35,30 @@
     <section class="editTodo__duration">
       <datepicker info="todo.dateStart"></datepicker> 
       &nbsp;&nbsp; To &nbsp;&nbsp; <datepicker info="todo.dateEnd"></datepicker>
+
+      &nbsp;&nbsp; check &nbsp;&nbsp; <datepicker info="todo.dateEnd"></datepicker>
     </section>
 
     <h1 class="editTodo__title">
       <p ng-model="todo.title" contenteditable="true"> {{ todo.title }}</p>
     </h1>
 
-    <section class="container editTodo__dropdowns">
+    <!-- <section class="container editTodo__dropdowns">
       <div class="row">
-
         <div> Status </div>
-        <div class="form-group">
-          <p>{{ todo.status }}</p>
-          <div class="form-group editTodo__dropdowns__menu">
-            <span ng-repeat="state in todoStates.status">
-              <input type="radio" name="Status" value="{{ state }}" 
-                ng-model="todo.status">{{ state }}<br>
-            </span>
-          </div>
-        </div>
+        <dropdown options="todoStates.status" selected="todo.status"></dropdown>
       </div>
-
+    
       <div class="row">
         <div> Urgency </div>
-        <div class="form-group">
-          <p>{{ todo.urgency }}</p>
-          <div class="form-group editTodo__dropdowns__menu">
-              <span ng-repeat="state in todoStates.urgency">
-                <input type="radio" name="Urgency" value="{{ state }}" 
-                  ng-model="todo.urgency"> {{ state }}<br>
-              </span>
-          </div>
-        </div>
+        <dropdown options="todoStates.urgency" selected="todo.urgency"></dropdown>
       </div>
+      
       <div class="row">
         <div> User </div>
-        <div class="form-group">
-          <p>{{ todo.username }}</p>
-          <div class="form-group editTodo__dropdowns__menu">
-              <span ng-repeat="user in allUsers">
-                <input type="radio" name="User" value="{{ user }}" 
-                  ng-model="todo.user"> {{ user.name }}<br>
-              </span>
-          </div>
-        </div>
+        <dropdown options="allUsers" selected="todo.user"></dropdown>
       </div>
-    </section>
+    </section> -->
 
     <p ng-model="todo.description" contenteditable="true"> {{ todo.description }}</p>
   </div>

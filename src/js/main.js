@@ -11,7 +11,7 @@ import AngularUUID from 'angular-uuid';
 // Set single menu items
 // differentiate between string and obj for dropdown items {page: 'about', list: []}
 var menuItems = Menu.buildMenu(['home', 'about', 'overview', 'archive']);
-var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'angular-uuid', 'editInHTML'])
+var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'angular-uuid', 'editInHTML', 'dropdownComponent', 'createTodoComponent'])
 
   .config(function($routeProvider) { 
     
@@ -50,15 +50,15 @@ var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'angula
   });
 
   todoApp.controller('homeControls',     function($scope, $location, $route)       { Pages.home($scope, $location, $route, Firebase); });
-  todoApp.controller('aboutControls',    function($scope)                          { Pages.about($scope) });
-  todoApp.controller('overviewControls', function($scope, $route, $location)       { new Dashboard().init(Firebase, TodoControls, $scope, $route, $location, 'tasks')   });
-  todoApp.controller('archiveControls',  function($scope, $route, $location)       { new Dashboard().init(Firebase, TodoControls, $scope, $route, $location, 'archive') });
-  todoApp.controller('todoControls',     function($scope, $route, $location) { Pages.todo($scope, $route, $location, Firebase, TodoControls) });
-
-  todoApp.controller('createControls',   function($scope, $route, uuid) { 
-    let getUUID = uuid.v4();
-    Pages.create($scope, $route, getUUID, Firebase, TodoControls) 
+  
+  todoApp.controller('overviewControls', function($scope, $route, $location, $rootScope, uuid)       {
+    new Dashboard().init(Firebase, TodoControls, $scope, $route, $location, 'tasks', $rootScope, uuid)
   });
+
+  todoApp.controller('archiveControls',  function($scope, $route, $location, $rootScope)       { 
+    new Dashboard().init(Firebase, TodoControls, $scope, $route, $location, 'archive', $rootScope) 
+  });
+  todoApp.controller('todoControls',     function($scope, $route, $location) { Pages.todo($scope, $route, $location, Firebase, TodoControls) });
 
 /*
   // replace this with some fun stats based on user data returned

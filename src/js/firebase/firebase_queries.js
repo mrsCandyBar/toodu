@@ -28,7 +28,7 @@ class Query {
 	dataAndsubscribeToUpdates(database, url) {
 		let data = new Promise((resolve, reject) => {
 			database.ref(url).on('value', function(snapshot) {
-				resolve('data >>> retrieved and subscribed', snapshot.val());
+				resolve(snapshot.val());
 
 			}, function(err) {
 				reject('data >>> denied retrieval and subscription', err);
