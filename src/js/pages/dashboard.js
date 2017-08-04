@@ -1,16 +1,20 @@
+import Todo from './todo.js';
 import Create from './todo_create.js';
 
 class Dashboard {
 
 	init(Firebase, TodoControls, $scope, $route, $location, activity, $rootScope, uuid) {
 
-		let createObj = new Create(TodoControls, $scope, $route, uuid, Firebase);
-		$scope.myObj = createObj;
+		$scope.newTask = [];
+        $scope.viewTodo = [];
 
-		if (Firebase.userID) {
+        if (Firebase.userID) {
 			Firebase.retrieveUserInfo().then(() => {
 				$scope.user = Firebase.user;
 				Firebase.retrieveTasks($rootScope, activity);
+
+                let createObj = new Create(TodoControls, $scope, $route, uuid, Firebase);
+                $scope.newTask = createObj;
 			});
 		}	
 
@@ -20,10 +24,15 @@ class Dashboard {
 
 		$scope.$on('userTasksUpdated', function(event, data){
 			Firebase.tasks = data;
+
 			let updateTasks = TodoControls.retrieveTodos($scope, $route, Firebase);
+			let viewTodoObject = new Todo($scope, $route, Firebase, TodoControls);
+
 
 			$scope.$apply(function () { 
 				$scope.taskList = updateTasks;
+				$scope.viewTodo = viewTodoObject;
+                $scope.newTask = createObj;
             });
         });
 	}

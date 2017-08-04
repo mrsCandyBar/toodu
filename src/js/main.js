@@ -10,8 +10,8 @@ import AngularUUID from 'angular-uuid';
 
 // Set single menu items
 // differentiate between string and obj for dropdown items {page: 'about', list: []}
-var menuItems = Menu.buildMenu(['home', 'about', 'overview', 'archive']);
-var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'angular-uuid', 'editInHTML', 'dropdownComponent', 'createTodoComponent'])
+var menuItems = Menu.buildMenu(['home', 'overview', 'archive']);
+var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'angular-uuid', 'editInHTML', 'dropdownComponent', 'createTodoComponent', 'todoComponent'])
 
   .config(function($routeProvider) { 
     
@@ -22,14 +22,6 @@ var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'angula
       .when('/overview/:filter', {
         controller: 'overviewControls',
         templateUrl: 'template/overview.html'
-      })
-      .when('/todo/:id', {
-        controller: 'todoControls',
-        templateUrl: 'template/todo.html'
-      })
-      .when('/create', {
-        controller: 'createControls',
-        templateUrl: 'template/todo_create.html'
       })
 
     // set route for unknown routes
@@ -58,7 +50,6 @@ var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'angula
   todoApp.controller('archiveControls',  function($scope, $route, $location, $rootScope)       { 
     new Dashboard().init(Firebase, TodoControls, $scope, $route, $location, 'archive', $rootScope) 
   });
-  todoApp.controller('todoControls',     function($scope, $route, $location) { Pages.todo($scope, $route, $location, Firebase, TodoControls) });
 
 /*
   // replace this with some fun stats based on user data returned

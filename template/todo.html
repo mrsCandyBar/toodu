@@ -2,75 +2,73 @@
 
   <ul class="pagination">
     <li><a onclick="history.back()">Back</a></li>
-    <li><a  ng-if="isAdmin" 
-            ng-show="!editable && todo.status === 'Done'" 
+    <li><a  ng-if="view.user.admin"
+            ng-show="!view.editable && view.todo.status === 'Done'"
             ng-click="moveTodo()">
-              {{ todo.isActive === true ? 'Archive' : 'Activate' }}</a></li>
+              {{ view.todo.isActive === true ? 'Archive' : 'Activate' }}</a></li>
 
-    <li><a  ng-if="isAdmin" 
-            ng-show="!editable" 
+    <li><a  ng-if="view.user.admin"
+            ng-show="!view.editable"
             ng-click="deleteTodo()">
               Delete</a></li>
   </ul>
 
 
   <!-- Visible on page when not in edit state -->
-  <h1 ng-show="!editable && isAdmin || !isAdmin">
+  <h1 ng-show="!view.editable && view.user.admin">
     <em>
-      {{ todo.title }} 
-      <small>({{ todo.urgency }})</small>
+      {{ view.todo.title }}
+      <small>({{ view.todo.urgency }})</small>
     </em>
 
     <small><br>
       {{ taskDates.total }}
-      <small><br>Assigned to : {{ todo.username }} ({{ todo.status }})</small>
+      <small><br>Assigned to : {{ view.todo.username }} ({{ view.todo.status }})</small>
     </small>
   </h1>
-  <p ng-show="!editable && isAdmin || !isAdmin">{{ todo.description }}</p>
+  <p ng-show="!view.editable && view.user.admin || !view.user.admin">{{ view.todo.description }}</p>
 
 
   <!-- only visible in edit state -->
-  <div ng-if="isAdmin" ng-show="editable" class="editTodo">
+  <div ng-if="view.user.admin" ng-show="view.editable" class="editTodo">
 
     <section class="editTodo__duration">
-      <datepicker info="todo.dateStart"></datepicker> 
-      &nbsp;&nbsp; To &nbsp;&nbsp; <datepicker info="todo.dateEnd"></datepicker>
-
-      &nbsp;&nbsp; check &nbsp;&nbsp; <datepicker info="todo.dateEnd"></datepicker>
+      <datepicker info="view.todo.dateStart"></datepicker>
+      &nbsp;&nbsp; To &nbsp;&nbsp; <datepicker info="view.todo.dateEnd"></datepicker>
     </section>
 
     <h1 class="editTodo__title">
-      <p ng-model="todo.title" contenteditable="true"> {{ todo.title }}</p>
+      <p ng-model="view.todo.title" contenteditable="true"> {{ view.todo.title }}</p>
     </h1>
 
-    <!-- <section class="container editTodo__dropdowns">
+    <section class="container editTodo__dropdowns">
       <div class="row">
         <div> Status </div>
-        <dropdown options="todoStates.status" selected="todo.status"></dropdown>
+        <dropdown options="view.todoStates.status" selected="view.todo.status"></dropdown>
       </div>
     
       <div class="row">
         <div> Urgency </div>
-        <dropdown options="todoStates.urgency" selected="todo.urgency"></dropdown>
+        <dropdown options="view.todoStates.urgency" selected="view.todo.urgency"></dropdown>
       </div>
       
       <div class="row">
         <div> User </div>
-        <dropdown options="allUsers" selected="todo.user"></dropdown>
+        <dropdown options="allUsers" selected="view.todo.user"></dropdown>
       </div>
-    </section> -->
+    </section>
 
-    <p ng-model="todo.description" contenteditable="true"> {{ todo.description }}</p>
+    <p ng-model="view.todo.description" contenteditable="true"> {{ view.todo.description }}</p>
   </div>
 
   
   <!-- Comments section -->
-  <section class="contentHolder__comments" ng-show="isAdmin && todo.comments || !isAdmin">
-    <span>{{todoList.comments.length}} comments</span>
+  <section class="contentHolder__comments" ng-show="view.user.admin && view.todo.comments || !view.user.admin">
+    <span>{{view.todoList.comments.length}} comments</span>
     <ul 
-      ng-show="todo.comments"
+      ng-show="view.todo.comments"
       class="unstyled">
-      <li ng-repeat="comment in todo.comments">
+      <li ng-repeat="comment in view.todo.comments">
         <h5>{{ comment.name }} said</h5>
         <p>{{ comment.message }}</p>
 
@@ -100,7 +98,7 @@
   <!-- /comments section -->
 
   <br><br>
-  <button class="btn btn-primary" ng-click="update()">{{ editable ? 'Save' : 'Edit' }}</button>
-  <button ng-show="editable" class="btn btn-primary" ng-click="cancel()">cancel</button>
+  <button class="btn btn-primary" ng-click="update()">{{ view.editable ? 'Save' : 'Edit' }}</button>
+  <button ng-show="view.editable" class="btn btn-primary" ng-click="cancel()">cancel</button>
 
 </article>

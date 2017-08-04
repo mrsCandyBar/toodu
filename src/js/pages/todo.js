@@ -2,58 +2,48 @@
 class Todo {
 
 	constructor($scope, $route, Firebase, TodoControls) {
-		this.taskList = TodoControls.retrieveSingleTodo($scope, $route, Firebase);
+		this.todo = TodoControls.retrieveSingleTodo($scope, $route, Firebase);
 		this.todoStates = TodoControls.retrieveTodoStates();
 		this.editable = true; //false;
 		this.user = Firebase.user;
 		this.allUsers = Firebase.allUsers ? Firebase.allUsers : this.getUsers(Firebase);
 		this.isAdmin = this.user.admin;
+    	this.backup = JSON.stringify(this.todo);
 
 		this.taskDates = {
-			start : this.taskList.dateStart,
-			end : this.taskList.dateEnd,
-			total : moment(this.taskList.dateEnd).fromNow()
+			start : this.todo.dateStart,
+			end : this.todo.dateEnd,
+			total : moment(this.todo.dateEnd).fromNow()
 		}
 
 		this.comment = {};
 		this.reply = [];
+		this.Firebase = Firebase;
 	}
 
 	getUsers(Firebase) {
 		Firebase.retrieveUsers().then((response) => {
 			this.allUsers = Firebase.allUsers;
-			console.log('users >>>', this.allUsers, response);
 		});
 	}
 
     update($scope, Firebase) {
-	    if ($scope.editable) { 
+		if ($scope.todo.user.indexOf('{') > -1) {
+			let user = JSON.parse($scope.todo.user);
+			$scope.todo.username = user['name'];
+			$scope.todo.user = user['id'];
+		}
 
-	    	console.log('todo >>>', $scope.todo);
-	    	if ($scope.todo.user.indexOf('{') > -1) {
-				let user = JSON.parse($scope.todo.user);
-				$scope.todo.username = user['name'];
-				$scope.todo.user = user['id'];
-				console.log('todo >>> user', $scope.todo);
-			}
-
-	        let compareObj = JSON.stringify($scope.todo); 
-
-	        if ($scope.backup != compareObj) {
-	          $scope.backup = JSON.stringify($scope.todo);
-	          Firebase.updateTask(JSON.parse(compareObj));
-	        }
-
-	    } else {
-	        $scope.backup = JSON.stringify($scope.todo);
-	    }
+		let compareObj = JSON.stringify($scope.todo);
+		if ($scope.backup != compareObj) {
+		  $scope.backup = JSON.stringify($scope.todo);
+		  Firebase.updateTask(JSON.parse(compareObj));
+		}
 
 	    $scope.taskDates.total = moment($scope.todo.dateEnd).fromNow();
-	    $scope.editable = !$scope.editable;
 	}
 
     cancel($scope) {
-	    $scope.editable = !$scope.editable;
 	    $scope.todo = JSON.parse($scope.backup);
 	}
 
@@ -64,7 +54,7 @@ class Todo {
 
 		if ($scope.todo.isActive === true) {
 			$location.path(location);
-			$route.reload();
+
 		} else {
 			$scope.editable = true;
 			$scope.todo.status = 'Waiting';

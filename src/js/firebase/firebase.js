@@ -24,7 +24,7 @@ class Firebase {
     }
 
     this.logIn(user).then((response) => {
-      $route.reload();
+      console.log('logged in')
       
     }, (error) => {
       console.log('auto login failed >>>', error);

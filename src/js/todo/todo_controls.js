@@ -23,9 +23,8 @@ class TodoControls {
 	}
 
     retrieveSingleTodo($scope, $route, store) {
-    	$scope.todo = store.tasks[$route.current.params.id];
+    	$scope.todo = store.tasks[$route.current.params.filter];
 	    $scope.todo = _retrieve('single', $scope.todo);
-
 	    return $scope.todo;
     }
 
