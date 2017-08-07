@@ -3,44 +3,59 @@ import Create from './todo_create.js';
 
 class Dashboard {
 
-	init(Firebase, TodoControls, $scope, $route, $location, activity, $rootScope, uuid) {
+	init(Firebase, TodoControls, $scope, $route, $location, activity, $rootScope, uuid, Store) {
 
-		$scope.newTask = [];
-        $scope.viewTodo = [];
+        if (Store.user) {
+            $scope.allFilters = Store.allFilters;
+            $scope.allTasks = Store.allTasks;
+            $scope.newTask = Store.newTask;
+            $scope.taskStates = Store.taskStates;
+            $scope.user = Store.user;
+            $scope.otherUsers = Store.otherUsers;
+            console.log('page reload >>>', $scope, Store);
+        }
 
-        if (Firebase.userID) {
+        console.log('loaded', $scope, Store);
+
+		// Listen for user to log in
+        $scope.$on('userLoggedIn', function(event){
+
+            // Get user info
 			Firebase.retrieveUserInfo().then(() => {
 				$scope.user = Firebase.user;
+				if ($scope.user.isAdmin) {
+                    $scope.otherUsers = Firebase.otherUsers;
+                }
+
+                // Retrieve tasks
 				Firebase.retrieveTasks($rootScope, activity);
-
-                let createObj = new Create(TodoControls, $scope, $route, uuid, Firebase);
-                $scope.newTask = createObj;
 			});
-		}	
+        });
 
-		$scope.goTo = function(route) {
-			_redirect($route, $location, route);
-		}
+        // Listen for tasks retrieved
+        $scope.$on('userTasksUpdated', function(event, data){
+            Firebase.tasks = data;
 
-		$scope.$on('userTasksUpdated', function(event, data){
-			Firebase.tasks = data;
+            // Order tasks
+            let updateTasks = TodoControls.retrieveTodos($scope,Firebase, uuid);
 
-			let updateTasks = TodoControls.retrieveTodos($scope, $route, Firebase);
-			let viewTodoObject = new Todo($scope, $route, Firebase, TodoControls);
+            $scope.$apply(function () {
+                $scope = updateTasks;
 
-
-			$scope.$apply(function () { 
-				$scope.taskList = updateTasks;
-				$scope.viewTodo = viewTodoObject;
-                $scope.newTask = createObj;
+                Store.allFilters = $scope.allFilters;
+                Store.allTasks = $scope.allTasks;
+                Store.newTask = $scope.newTask;
+                Store.taskStates = $scope.taskStates;
+                Store.user = $scope.user;
+                Store.otherUsers = $scope.otherUsers;
+                console.log('tasks returned >>>', $scope, Store);
             });
         });
-	}
-}
 
-function _redirect($route, $location, routeValue) {
-	if ($location && routeValue) { $location.path(routeValue); }
-	$route.reload();
+        $scope.view = function(taskId) {
+            $location.path('overview/' + taskId);
+        }
+	}
 }
 
 module.exports = Dashboard;

@@ -7,17 +7,6 @@ class Create {
 		this.allUsers 	= Firebase.allUsers;
 		this.Firebase 	= Firebase;
 		this.uuidGen 	= uuid;
-		this.init(Firebase, $scope, $route);
-	}
-
-	init(Firebase, $scope, $route) {
-		Firebase.retrieveUsers().then((response) => {
-          	$scope.allUsers = response;
-            _redirect($route);
-
-		}, (reject) => {
-			console.log('user data not changed', reject);
-		});
 	}
 	
 	submit($scope) {

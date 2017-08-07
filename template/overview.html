@@ -8,22 +8,20 @@
 		<small>org: {{ user.organisation }}</small>
 	</h1> -->
 
-	<h1 
-		ng-show="taskList.todos && taskList.todos.length > 0" 
+	<h1 ng-show="allTasks && allTasks.length > 0"
 		class="ucase">
 			Task List
-			<a  ng-show="user.admin && taskList.todos" 
-			 	href="index.html#!/create" 
-			 	class="btn btn-primary">create task</a></h1>
+			<a ng-show="user.admin && allTasks" href="index.html#!/create" class="btn btn-primary">
+				create task</a></h1>
 
-	<!--<create model="newTask"></create>-->
-	<todo model="viewTodo"></todo>
 
-	<!-- <section class="contentHolder__btn-holder" ng-show="taskList.todos && taskList.todos.length > 0">
+	<!--<todo model="viewTodo"></todo>-->
+
+	<section class="contentHolder__btn-holder" ng-show="allTasks && allTasks.length > 0">
 	
-		<span ng-show="taskList.todos.length > 6">
+		<span ng-show="allTasks.length > 6">
 			Filter 
-			<a 	ng-repeat="filter in taskList.filters"
+			<a ng-repeat="filter in allFilters"
 				class="btn btn-sm btn-default {{ current.params.filter === filter ? 'active' : ''}}" 
 				href="index.html#!/overview/{{ filter }}">
 				{{ filter }}
@@ -33,20 +31,23 @@
 		</span>
 	
 		<ul class="taskList">
-			<li ng-repeat="todo in taskList.todos" class="taskList__holder" ng-click="goTo('todo/' + todo.id)">
+			<li ng-repeat="task in allTasks" class="taskList__holder" ng-click="view(task.id)">
 				
-				<a 	class="taskList__holder--title status__{{ todo.status}} urgency__{{ todo.urgency }}">
-					{{ todo.title }}
+				<a 	class="taskList__holder--title status__{{ task.status}} urgency__{{ task.urgency }}">
+					{{ task.title }}
 				</a><br>
 	
-				<div ng-show="user.admin" class="taskList__holder--user status__{{ todo.status }} urgency__{{ todo.urgency }}">
-					{{ todo.username }} 
-					(<i>{{ todo.status }}</i>) </div>
+				<div ng-show="user.admin" class="taskList__holder--user status__{{ task.status }} urgency__{{ task.urgency }}">
+					{{ task.username }}
+					(<i>{{ task.status }}</i>) </div>
 			</li>
 		</ul>
-	</section> -->
+	</section>
 
-	<h3 ng-show="taskList.todos.length === 0"><br>No Todos</h3>
-	<h3 ng-show="!taskList.todos"><br>Loading</h3>
+	<h3 ng-show="allTasks.length === 0"><br>No Todos</h3>
+	<h3 ng-show="!allTasks"><br>Loading</h3>
+
+	<!-- Create -->
+	<!--<create model="newTask" filters="todoStates"></create>-->
 
 </article>

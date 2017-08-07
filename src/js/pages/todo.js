@@ -6,7 +6,6 @@ class Todo {
 		this.todoStates = TodoControls.retrieveTodoStates();
 		this.editable = true; //false;
 		this.user = Firebase.user;
-		this.allUsers = Firebase.allUsers ? Firebase.allUsers : this.getUsers(Firebase);
 		this.isAdmin = this.user.admin;
     	this.backup = JSON.stringify(this.todo);
 
@@ -19,12 +18,6 @@ class Todo {
 		this.comment = {};
 		this.reply = [];
 		this.Firebase = Firebase;
-	}
-
-	getUsers(Firebase) {
-		Firebase.retrieveUsers().then((response) => {
-			this.allUsers = Firebase.allUsers;
-		});
 	}
 
     update($scope, Firebase) {

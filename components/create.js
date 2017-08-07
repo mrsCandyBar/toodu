@@ -5,7 +5,8 @@ angular
 			restrict: 'E',
 			transclude: true,
 			scope: {
-				myObj: '=model'
+				myObj: '=model',
+				states: '=filters'
 			},
 			
 			//controller: 'createControls',

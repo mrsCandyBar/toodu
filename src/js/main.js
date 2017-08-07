@@ -4,6 +4,7 @@ import Pages from './controller_pageControls.js';
 import Dashboard from './pages/dashboard.js';
 import TodoControls from './todo/todo_controls.js';
 import Firebase from './firebase/firebase.js';
+import Store from './store.js';
 
 import AngularUUID from 'angular-uuid';
 
@@ -21,7 +22,7 @@ var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'angula
     $routeProvider
       .when('/overview/:filter', {
         controller: 'overviewControls',
-        templateUrl: 'template/overview.html'
+        templateUrl: 'template/overview.html',
       })
 
     // set route for unknown routes
@@ -37,14 +38,14 @@ var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'angula
     
     if (window.sessionStorage.length > 0) {
       this.loggedIn = true;
-      Firebase.autoLogin($route);
+      Firebase.autoLogin($rootScope, $route);
     }
   });
 
-  todoApp.controller('homeControls',     function($scope, $location, $route)       { Pages.home($scope, $location, $route, Firebase); });
+  todoApp.controller('homeControls',     function($rootScope, $scope, $location, $route)       { Pages.home($rootScope, $scope, $location, $route, Firebase); });
   
   todoApp.controller('overviewControls', function($scope, $route, $location, $rootScope, uuid)       {
-    new Dashboard().init(Firebase, TodoControls, $scope, $route, $location, 'tasks', $rootScope, uuid)
+    new Dashboard().init(Firebase, TodoControls, $scope, $route, $location, 'tasks', $rootScope, uuid, Store)
   });
 
   todoApp.controller('archiveControls',  function($scope, $route, $location, $rootScope)       { 

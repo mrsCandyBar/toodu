@@ -2,14 +2,20 @@ import TodoModel from './todo_model.js';
 
 class TodoControls {
 
-	retrieveTodos($scope, $route, store) {
+	retrieveTodos($scope, store, uuid) {  /*$route,*/
 		let todoList = $scope;
-		todoList.filters = _retrieve('search');
-	    todoList.todos = _retrieveTodos(store.tasks);
+		todoList.allFilters = _retrieve('search');
+	    todoList.allTasks = _retrieveTodos(store.tasks);
 
-	    if ($route.current.params) {
+	    if (store.user.admin) {
+            todoList.newTask = this.createTodo(store.user);
+            todoList.taskStates = this.retrieveTodoStates();
+		}
+
+	    /*if ($route.current.params) {
 	      todoList.todos = _filterResults($route.current.params['filter'], todoList.todos);
 	    }
+*/
 
 	    return todoList;
 	}
@@ -23,21 +29,25 @@ class TodoControls {
 	}
 
     retrieveSingleTodo($scope, $route, store) {
-    	$scope.todo = store.tasks[$route.current.params.filter];
+    	$scope.todo = store.tasks[$route.current.params.id];
 	    $scope.todo = _retrieve('single', $scope.todo);
+
 	    return $scope.todo;
     }
 
-    createTodo(uuid, user) {
+    createTodo(user) {
     	let todo = _retrieve('single', []);
-    	todo.id = uuid;
+    	todo.id = 0;
     	todo.organisation = user.organisation;
 	    return todo;
 	}
 }
 
 function _retrieve(method, property) {
-	if (method === 'search') {			return new TodoModel([]).getModelFilters(property) } 
+	if (method === 'search') {
+		let emptyModel = new TodoModel([]);
+		return emptyModel.getModelFilters(emptyModel)
+	}
 	else if (method === 'state') {		return new TodoModel([]).getStates(property) } 
 	else if (method === 'single') {		return new TodoModel(property) }
 }
