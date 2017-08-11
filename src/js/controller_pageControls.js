@@ -1,5 +1,4 @@
 import Home from './pages/home.js';
-import Todo from './pages/todo.js';
 
 class Pages {
 

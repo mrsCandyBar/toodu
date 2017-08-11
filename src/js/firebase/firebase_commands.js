@@ -30,7 +30,7 @@ class Command {
 		let location = newLocation ? newLocation : 'tasks';
 		database.ref(location + '/' + taskId).update({
 			id: taskData.id,
-			user: taskData.user,
+			userid: taskData.userid,
 			username: taskData.username,
 			title: taskData.title,
 			description: taskData.description,

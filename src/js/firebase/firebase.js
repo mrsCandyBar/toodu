@@ -7,8 +7,7 @@ import Command from './firebase_commands.js';
 class Firebase {
 	
 	constructor() {
-        window.sessionStorage.userID        ? this.userID = window.sessionStorage.userID                            : this.userID;
-        window.sessionStorage.user          ? this.user = JSON.parse(window.sessionStorage.user)                    : this.user;
+        window.sessionStorage.userID        ? this.userID = window.sessionStorage.userID                            : this.userID;window.sessionStorage.user          ? this.user = JSON.parse(window.sessionStorage.user)                    : this.user;
         window.sessionStorage.tasks         ? this.tasks = JSON.parse(window.sessionStorage.tasks)                  : this.tasks;
         window.sessionStorage.searchFilters ? this.searchFilters = JSON.parse(window.sessionStorage.searchFilters)  : this.searchFilters;
         this.allUsers;
@@ -110,12 +109,15 @@ class Firebase {
 
     // retrieve tasks
     retrieveTasks($rootScope, activity) {
+	    let TaskUpdater = this.tasks;
+
         this.database
             .ref('/' + activity)
             .orderByChild(this.searchFilters.filter)
             .equalTo(this.searchFilters.value)
             .on('value', function(snapshot) {
                 let updates = snapshot.val() ? snapshot.val() : [];
+                TaskUpdater = updates;
                 $rootScope.$broadcast('userTasksUpdated', updates);
 
             }, function(err) {
@@ -152,8 +154,6 @@ class Firebase {
 
     // update task
     updateTask(taskData) {
-        if (!this.tasks) { this.tasks = {} };
-        this.tasks[taskData.id] = taskData;
         Command.updateTask(this.database, taskData.id, taskData, '');
     }
 

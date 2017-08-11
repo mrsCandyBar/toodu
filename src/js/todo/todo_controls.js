@@ -12,6 +12,8 @@ class TodoControls {
             todoList.taskStates = this.retrieveTodoStates();
 		}
 
+		this.genUUID = uuid;
+
 	    /*if ($route.current.params) {
 	      todoList.todos = _filterResults($route.current.params['filter'], todoList.todos);
 	    }
@@ -41,6 +43,26 @@ class TodoControls {
     	todo.organisation = user.organisation;
 	    return todo;
 	}
+
+    update($scope) {
+		let checkUsername = JSON.stringify($scope.user);
+        if (checkUsername.indexOf('{') === -1) {
+        	return 'Please select a user';
+
+        } else {
+            if ($scope.id === 0) {
+                let UUID = this.genUUID.v4();
+                $scope.id = UUID;
+            }
+
+            let newTask = JSON.stringify($scope);
+            newTask = JSON.parse(newTask);
+            let user = $scope.user;
+            newTask.username = user['name'];
+            newTask.userid = user['id'];
+            return newTask;
+        }
+    }
 }
 
 function _retrieve(method, property) {

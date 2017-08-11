@@ -20,8 +20,8 @@ angular.module('dropdownComponent', [])
 	          	$scope.allOptions = getOptions;
 	        }
 
-	        if ($scope.selectedOption.length === 0) {
-                $scope.selectedOption = $scope.allOptions[0];
+	        if (!$scope.selectedOption) {
+                $scope.selectedOption = '..'
 			}
 
       		$scope.menuStatus;
@@ -39,6 +39,17 @@ angular.module('dropdownComponent', [])
                     $scope.menuStatus = 'isClosed';
                 }
             };
+
+            $scope.$on('updateArrayEvent', function(event, data) {
+            	let selected = JSON.stringify($scope.selectedOption);
+
+            	if (selected.indexOf('{') > -1) {
+                    console.log('broadcast recieved >>', $scope.selectedOption);
+                    $scope.selectedOption = $scope.selectedOption.name ? $scope.selectedOption.name : $scope.selectedOption;
+				}
+			});
+
+
 	      },
 	      template:
 	      	'<div class="form-group dd__container">' +

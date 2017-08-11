@@ -5,16 +5,17 @@ angular
 			restrict: 'E',
 			transclude: true,
 			scope: {
-				myObj: '=model',
-				states: '=filters'
+				newObject: '=model',
+                task: '=filters'
 			},
 			
 			//controller: 'createControls',
 			controller: function($scope) {
-				$scope = _buildScope($scope.myObj, $scope);
-
-				$scope.submit = function() { 
-					$scope.myObj.submit($scope);
+				$scope.submit = function(type) {
+					if (type === 'newTask') {
+                        $scope.newObject.id = 0;
+					}
+					$scope.$emit('testMessage', $scope.newObject);
 				}
 			},
 

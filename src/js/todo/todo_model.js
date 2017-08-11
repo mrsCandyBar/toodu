@@ -5,7 +5,8 @@ class TodoModel extends ModelProto {
 	constructor(rawObj) {
 		super();
 		this.id = '';
-		this.user = '';
+		this.user = 'Select a User';
+        this.userid = '';
 		this.username = '';
 		this.title = 'Your Title goes here...';
 		this.description = 'Your description starts here, click to select the text of the title and of the description';
@@ -14,14 +15,22 @@ class TodoModel extends ModelProto {
 		this.urgency = 'Waiting';
 		this.comments = 0;
 		this.isActive = true;
-		this.dateStart = '';
-		this.dateEnd = '';
+		this.getDate();
 		this.createModel(rawObj);
+	}
+
+	getDate() {
+		let startDate = new Date().getFullYear() + '-';
+        	startDate += (new Date().getMonth() + 1) + '-';
+        	startDate += new Date().getDate();
+
+        this.dateStart = startDate;
+        this.dateEnd = startDate;
 	}
 
 	getStates(property) {
 		let states = {
-			status: 	['Waiting', 'Busy', 'Done', 'Hold'], 
+			status: 	['Waiting', 'Busy', 'Done', 'Hold'],
 			urgency: 	['Waiting', 'Important', 'Urgent', 'Done', 'Hold']
 		}
 		return states;

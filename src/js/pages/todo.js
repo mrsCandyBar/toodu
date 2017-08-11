@@ -2,8 +2,8 @@
 class Todo {
 
 	constructor($scope, $route, Firebase, TodoControls) {
-		this.todo = TodoControls.retrieveSingleTodo($scope, $route, Firebase);
-		this.todoStates = TodoControls.retrieveTodoStates();
+        this.todoStates = TodoControls.retrieveTodoStates();
+        this.todo = TodoControls.retrieveSingleTodo($scope, $route, Firebase);
 		this.editable = true; //false;
 		this.user = Firebase.user;
 		this.isAdmin = this.user.admin;
