@@ -38,7 +38,7 @@ class Menu {
 
 		$rootScope.$on('$routeChangeSuccess', function (e, current, pre) {
 			menu.activeRoot = current.$$route.templateUrl;
-			if (menu.activeRoot.indexOf('overview') > -1) {
+			if (menu.activeRoot.indexOf('dashboard') > -1) {
 				$scope.loggedIn = true
 			}
 			Object.keys(menu.items).forEach(item => {

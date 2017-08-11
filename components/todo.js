@@ -5,31 +5,45 @@ angular
             restrict: 'E',
             transclude: true,
             scope: {
-                view: '=model'
+                task: '=model',
+                filter: '=filters',
+                user: '=member'
             },
 
             controller: function($scope) {
-                $scope = _buildScope($scope.view, $scope);
-                $scope.update = function() {
-                    if ($scope.view.editable) {
-                        $scope.view.update($scope.view, $scope.view.Firebase)
-                    } else {
-                        $scope.view.backup = JSON.stringify($scope.view.todo);
+
+                $scope.$watch('task.editable', function() {
+                   if ($scope.task && $scope.task.editable) {
+                       let unalteredTask = JSON.stringify($scope.task);
+                       $scope.backup = unalteredTask;
+                   }
+                });
+
+                $scope.cancel = function() {
+                    $scope.task = JSON.parse($scope.backup);
+
+                    if ($scope.task && ($scope.task.id != 0)) {
+                        $scope.task.editable = false;
                     }
-                    $scope.view.editable = !$scope.view.editable;
                 }
 
-                $scope.cancel = function() 			{
-                    $scope.view.todo = JSON.parse($scope.view.backup);
-                    $scope.view.editable = !$scope.view.editable;
+                $scope.submit = function(type) {
+                    if (type === 'newTask') {
+                        $scope.task.id = 0;
+                    }
+                    $scope.task.editable = false;
+                    $scope.$emit('newTaskData', $scope.task);
                 }
 
-                $scope.moveTodo = function() 		{ $scope.view.moveTodo($scope.view, $scope.view.Firebase, $scope.view.$route, $scope.view.$location) }
-                $scope.deleteTodo = function() 		{ $scope.view.deleteTodo($scope.view, $scope.view.Firebase) }
+                $scope.addComment = function()		{ task.addComment($scope, $scope.Firebase) }
+
+
+                $scope.moveTodo = function() 		{ $scope.moveTodo($scope, $scope.Firebase, $scope.$route, $scope.$location) }
+                $scope.deleteTodo = function() 		{ $scope.deleteTodo($scope.view, $scope.view.Firebase) }
 
                 // Comments
-                $scope.addComment = function()		{ view.addComment($scope.view, $scope.view.Firebase) }
-                $scope.replyToComment = function(commentId)	{ view.replyToComment($scope.view, commentId, $scope.view.Firebase) }
+
+                $scope.replyToComment = function(commentId)	{ view.replyToComment($scope, commentId, $scope.Firebase) }
             },
 
             templateUrl: 'template/todo.html',

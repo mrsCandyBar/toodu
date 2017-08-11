@@ -2,8 +2,8 @@ class Store {
     constructor() {
         this.allFilters;
         this.allTasks;
-        this.newTask;
-        this.taskStates;
+        this.currentTask;
+        this.taskFilters;
         this.user;
         this.otherUsers;
     }

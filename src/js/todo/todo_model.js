@@ -4,6 +4,7 @@ class TodoModel extends ModelProto {
 
 	constructor(rawObj) {
 		super();
+
 		this.id = '';
 		this.user = 'Select a User';
         this.userid = '';
@@ -15,6 +16,7 @@ class TodoModel extends ModelProto {
 		this.urgency = 'Waiting';
 		this.comments = 0;
 		this.isActive = true;
+		this.editable = false;
 		this.getDate();
 		this.createModel(rawObj);
 	}

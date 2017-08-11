@@ -38,6 +38,7 @@ class Command {
 			status: taskData.status,
 			comments: taskData.comments,
 			isActive: taskData.isActive,
+            editable: false,
 			urgency: taskData.urgency,
 			dateStart: taskData.dateStart,
 			dateEnd: taskData.dateEnd

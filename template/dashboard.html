@@ -14,16 +14,13 @@
 			<a ng-show="user.admin && allTasks" href="index.html#!/create" class="btn btn-primary">
 				create task</a></h1>
 
-
-	<!--<todo model="viewTodo"></todo>-->
-
 	<section class="contentHolder__btn-holder" ng-show="allTasks && allTasks.length > 0">
 	
 		<span ng-show="allTasks.length > 6">
 			Filter 
 			<a ng-repeat="filter in allFilters"
 				class="btn btn-sm btn-default {{ current.params.filter === filter ? 'active' : ''}}" 
-				href="index.html#!/overview/{{ filter }}">
+				href="index.html#!/dashboard/{{ filter }}">
 				{{ filter }}
 			</a>
 		
@@ -48,6 +45,7 @@
 	<h3 ng-show="!allTasks"><br>Loading</h3>
 
 	<!-- Create -->
-	<create model="newTask" filters="taskStates"></create>
+	<todo model="currentTask" filters="taskFilters" member="user"></todo>
+	<!--<create model="newTask"></create>-->
 
 </article>

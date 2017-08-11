@@ -2,23 +2,17 @@ import TodoModel from './todo_model.js';
 
 class TodoControls {
 
-	retrieveTodos($scope, store, uuid) {  /*$route,*/
+	retrieveTodos($scope, store, uuid) {
 		let todoList = $scope;
 		todoList.allFilters = _retrieve('search');
 	    todoList.allTasks = _retrieveTodos(store.tasks);
 
 	    if (store.user.admin) {
-            todoList.newTask = this.createTodo(store.user);
-            todoList.taskStates = this.retrieveTodoStates();
+            todoList.currentTask = this.createTodo(store.user);
+            todoList.taskFilters = this.retrieveTodoStates();
 		}
 
 		this.genUUID = uuid;
-
-	    /*if ($route.current.params) {
-	      todoList.todos = _filterResults($route.current.params['filter'], todoList.todos);
-	    }
-*/
-
 	    return todoList;
 	}
 
@@ -30,11 +24,12 @@ class TodoControls {
 		return _retrieve('state');
 	}
 
-    retrieveSingleTodo($scope, $route, store) {
-    	$scope.todo = store.tasks[$route.current.params.id];
-	    $scope.todo = _retrieve('single', $scope.todo);
+    retrieveSingleTodo(index, allTasks) {
+        let task = findTask(allTasks, 'id', index);
+        console.log('single >>>', task);
+        task = _retrieve('single', task);
 
-	    return $scope.todo;
+	    return task;
     }
 
     createTodo(user) {
@@ -66,6 +61,9 @@ class TodoControls {
 }
 
 function _retrieve(method, property) {
+
+	console.log('property >>>', property)
+
 	if (method === 'search') {
 		let emptyModel = new TodoModel([]);
 		return emptyModel.getModelFilters(emptyModel)
@@ -143,6 +141,16 @@ function _filterByOrder(param, store) {
     	};
     });
     return sortedList;
+}
+
+function findTask(allTasks, property, value) {
+	for (let i = 0; i < allTasks.length; i++) {
+        if (allTasks[i][property] == value) {
+            return allTasks[i];
+        }
+	}
+
+	return [];
 }
 
 module.exports = new TodoControls();

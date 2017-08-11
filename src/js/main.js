@@ -11,8 +11,8 @@ import AngularUUID from 'angular-uuid';
 
 // Set single menu items
 // differentiate between string and obj for dropdown items {page: 'about', list: []}
-var menuItems = Menu.buildMenu(['home', 'overview', 'archive']);
-var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'angular-uuid', 'editInHTML', 'dropdownComponent', 'createTodoComponent', 'todoComponent'])
+var menuItems = Menu.buildMenu(['home', 'dashboard']);
+var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'angular-uuid', 'editInHTML', 'dropdownComponent', 'todoComponent'])
 
   .config(function($routeProvider) { 
     
@@ -20,9 +20,9 @@ var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'angula
 
     // set custom urls
     $routeProvider
-      .when('/overview/:filter', {
-        controller: 'overviewControls',
-        templateUrl: 'template/overview.html',
+      .when('/dashboard/:filter', {
+        controller: 'dashboardControls',
+        templateUrl: 'template/dashboard.html',
       })
 
     // set route for unknown routes
@@ -42,17 +42,8 @@ var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'angula
     }
   });
 
-  todoApp.controller('homeControls',     function($rootScope, $scope, $location, $route)       { Pages.home($rootScope, $scope, $location, $route, Firebase); });
-  
-  todoApp.controller('overviewControls', function($scope, $route, $location, $rootScope, uuid)       {
-    new Dashboard().init(Firebase, TodoControls, $scope, $route, $location, 'tasks', $rootScope, uuid, Store)
-  });
+  todoApp.controller('homeControls',     function($rootScope, $scope, $location, $route)       {
+      Pages.home($rootScope, $scope, $location, $route, Firebase); });
 
-  todoApp.controller('archiveControls',  function($scope, $route, $location, $rootScope)       { 
-    new Dashboard().init(Firebase, TodoControls, $scope, $route, $location, 'archive', $rootScope) 
-  });
-
-/*
-  // replace this with some fun stats based on user data returned
-  .controller('beersControls',    function($scope, $locale) { Beer.initTabs($scope, $locale)
-  })*/
+  todoApp.controller('dashboardControls', function($scope, $route, $location, $rootScope, uuid)       {
+        new Dashboard().init(Firebase, TodoControls, $scope, $route, $location, 'tasks', $rootScope, uuid, Store); });

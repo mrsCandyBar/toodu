@@ -2,103 +2,110 @@
 
   <ul class="pagination">
     <li><a onclick="history.back()">Back</a></li>
-    <li><a  ng-if="view.user.admin"
-            ng-show="!view.editable && view.todo.status === 'Done'"
+    <li><a  ng-if="user.admin"
+            ng-show="!task.editable && task.status === 'Done'"
             ng-click="moveTodo()">
-              {{ view.todo.isActive === true ? 'Archive' : 'Activate' }}</a></li>
+              {{ task.isActive === true ? 'Archive' : 'Activate' }}</a></li>
 
-    <li><a  ng-if="view.user.admin"
-            ng-show="!view.editable"
+    <li><a  ng-if="user.admin"
+            ng-show="!task.editable"
             ng-click="deleteTodo()">
               Delete</a></li>
   </ul>
 
-
   <!-- Visible on page when not in edit state -->
-  <h1 ng-show="!view.editable && view.user.admin">
-    <em>
-      {{ view.todo.title }}
-      <small>({{ view.todo.urgency }})</small>
-    </em>
+  <section ng-show="!task.editable">
+    <h1>
+      <em>
+        {{ task.title }}
+        <small>({{ task.urgency }})</small>
+      </em>
 
-    <small><br>
-      {{ taskDates.total }}
-      <small><br>Assigned to : {{ view.todo.username }} ({{ view.todo.status }})</small>
-    </small>
-  </h1>
-  <p ng-show="!view.editable && view.user.admin || !view.user.admin">{{ view.todo.description }}</p>
+      <small><br>
+        {{ taskDates.total }}
+        <small><br>Assigned to : {{ task.username }} ({{ task.status }})</small>
+      </small>
+    </h1>
+    <p>{{ task.description }}</p>
+
+
+    <!-- Comments section -->
+    <section class="contentHolder__comments">
+      <span ng-show="task.comments">{{task.comments.length}} comments</span>
+      <ul ng-show="task.comments"
+              class="unstyled">
+        <li ng-repeat="comment in task.comments">
+          <h5>{{ comment.name }} said</h5>
+          <p>{{ comment.message }}</p>
+
+          <!-- Reply to response -->
+          <ul class="unstyled">
+            <li ng-repeat="reply in comment.reply">
+              <h5>{{ reply.name }} said</h5>
+              <p>{{ reply.message }}</p>
+            </li>
+          </ul>
+
+          <article>
+            <h5>reply</h5>
+            <textarea ng-model="reply[comment.id].message" class="form-control"></textarea>
+            <button ng-click="replyToComment(comment.id)" class="btn btn-sm btn-default">Reply</button>
+          </article>
+        </li>
+      </ul>
+
+      <article>
+        <br><br>
+        <h5>Comment : {{ user.name }}</h5>
+        <textarea ng-model="comment.message" class="form-control"></textarea>
+        <button ng-click="addComment()" class="btn btn-sm btn-default">Comment</button>
+      </article>
+    </section>
+    <!-- /comments section -->
+
+    <br><br>
+    <button class="btn btn-primary" ng-click="task.editable = true">Edit</button>
+  </section>
 
 
   <!-- only visible in edit state -->
-  <div ng-if="view.user.admin" ng-show="view.editable" class="editTodo">
+  <section ng-show="task.editable">
+    <div class="editTodo">
 
-    <section class="editTodo__duration">
-      <datepicker info="view.todo.dateStart"></datepicker>
-      &nbsp;&nbsp; To &nbsp;&nbsp; <datepicker info="view.todo.dateEnd"></datepicker>
-    </section>
+      <section class="editTodo__duration" ng-if="user.admin">
+        <datepicker info="task.dateStart"></datepicker>
+        &nbsp;&nbsp; To &nbsp;&nbsp; <datepicker info="task.dateEnd"></datepicker>
+      </section>
 
-    <h1 class="editTodo__title">
-      <p ng-model="view.todo.title" contenteditable="true"> {{ view.todo.title }}</p>
-    </h1>
+      <h1 class="editTodo__title" ng-if="user.admin">
+        <p ng-model="task.title" contenteditable="true"> {{ task.title }}</p>
+      </h1>
 
-    <section class="container editTodo__dropdowns">
-      <div class="row">
-        <div> Status </div>
-        <dropdown options="view.todoStates.status" selected="view.todo.status"></dropdown>
-      </div>
-    
-      <div class="row">
-        <div> Urgency </div>
-        <dropdown options="view.todoStates.urgency" selected="view.todo.urgency"></dropdown>
-      </div>
-      
-      <div class="row">
-        <div> User </div>
-        <dropdown options="allUsers" selected="view.todo.user"></dropdown>
-      </div>
-    </section>
+      <section class="container editTodo__dropdowns">
+        <div class="row">
+          <div> Status </div>
+          <dropdown options="filter.status" selected="task.status"></dropdown>
+        </div>
 
-    <p ng-model="view.todo.description" contenteditable="true"> {{ view.todo.description }}</p>
-  </div>
+        <div class="row" ng-if="user.admin">
+          <div> Urgency </div>
+          <dropdown options="filter.urgency" selected="task.urgency"></dropdown>
+        </div>
 
-  
-  <!-- Comments section -->
-  <section class="contentHolder__comments" ng-show="view.user.admin && view.todo.comments || !view.user.admin">
-    <span>{{view.todoList.comments.length}} comments</span>
-    <ul 
-      ng-show="view.todo.comments"
-      class="unstyled">
-      <li ng-repeat="comment in view.todo.comments">
-        <h5>{{ comment.name }} said</h5>
-        <p>{{ comment.message }}</p>
+        <div class="row" ng-if="user.admin">
+          <div> User </div>
+          <dropdown options="filter.users" selected="task.user"></dropdown>
+        </div>
+      </section>
 
-         <!-- Reply to response -->
-        <ul class="unstyled">
-          <li ng-repeat="reply in comment.reply">
-            <h5>{{ reply.name }} said</h5>
-            <p>{{ reply.message }}</p>
-          </li>
-        </ul>
+      <p ng-if="task.user.admin" ng-model="task.description" contenteditable="true"> {{ task.description }}</p>
+    </div>
 
-        <article>
-          <h5>reply</h5>
-          <textarea ng-model="reply[comment.id].message" class="form-control"></textarea>
-          <button ng-click="replyToComment(comment.id)" class="btn btn-sm btn-default">Reply</button>
-        </article>
-      </li>
-    </ul>
-
-    <article>
-      <br><br>
-      <h5>Comment from : {{ comment.name }}</h5>
-      <textarea ng-model="comment.message" class="form-control"></textarea>
-      <button ng-click="addComment()" class="btn btn-sm btn-default">Comment</button>
-    </article>
+    <br><br>
+    <button class="btn btn-primary" ng-click="submit()">{{ task.id === 0 ? 'Save Task' : 'Update' }}</button>
+    <button class="btn btn-primary" ng-click="cancel()">{{ task.id === 0 ? 'Clear' : 'Cancel' }}</button>
   </section>
-  <!-- /comments section -->
 
-  <br><br>
-  <button class="btn btn-primary" ng-click="update()">{{ view.editable ? 'Save' : 'Edit' }}</button>
-  <button ng-show="view.editable" class="btn btn-primary" ng-click="cancel()">cancel</button>
+
 
 </article>

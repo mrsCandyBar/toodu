@@ -5,10 +5,15 @@ class Dashboard {
         if (Store.user) {
             $scope.allFilters = Store.allFilters;
             $scope.allTasks = Store.allTasks;
-            $scope.newTask = Store.newTask;
-            $scope.taskStates = Store.taskStates;
+            $scope.currentTask = Store.currentTask;
+            $scope.taskFilters = Store.taskFilters;
             $scope.user = Store.user;
-            $scope.taskStates.users = Store.otherUsers;
+            $scope.taskFilters.users = Store.otherUsers;
+
+            if ($route.current.params.filter) {
+                console.log('page reload?');
+                $scope.currentTask = TodoControls.retrieveSingleTodo($route.current.params.filter, $scope.allTasks);
+            }
         }
 
 		// Listen for user to log in
@@ -34,14 +39,15 @@ class Dashboard {
                 Firebase.tasks = data;
                 let updateTasks = TodoControls.retrieveTodos($scope,Firebase, uuid);
 
-                console.log('Apply! >>>', data);
+                console.log('Apply! >>>', updateTasks);
                 $scope.$apply(function () {
                     $scope = updateTasks;
-                    $scope.taskStates.users = $scope.otherUsers;
+                    $scope.taskFilters.users = $scope.otherUsers;
+
                     Store.allFilters = $scope.allFilters;
                     Store.allTasks = $scope.allTasks;
-                    Store.newTask = $scope.newTask;
-                    Store.taskStates = $scope.taskStates;
+                    Store.currentTask = $scope.currentTask;
+                    Store.taskFilters = $scope.taskFilters;
                     Store.user = $scope.user;
                     Store.otherUsers = $scope.otherUsers;
                 });
@@ -52,8 +58,8 @@ class Dashboard {
                 function updateDOM() {
                     let updateTasks = TodoControls.retrieveTodos($scope,Firebase, uuid);
                     $scope.allTasks = updateTasks.allTasks;
-                    $scope.newTask = Store.newTask;
-                    $scope.taskStates = Store.taskStates;
+                    $scope.currentTask = Store.currentTask;
+                    $scope.taskFilters = Store.taskFilters;
                 }
 
                 if(!$scope.$$phase) {
@@ -68,9 +74,9 @@ class Dashboard {
             }
         });
 
-        $scope.$on('testMessage', function(event, data) {
+        $scope.$on('newTaskData', function(event, data) {
             let updateTask = TodoControls.update(data, Firebase);
-            Store.newTask = updateTask;
+            Store.currentTask = updateTask;
 
             if (updateTask == 'Please select a user') {
                 alert(updateTask);
@@ -80,7 +86,7 @@ class Dashboard {
         });
 
         $scope.view = function(taskId) {
-            $location.path('overview/' + taskId);
+            $location.path('dashboard/' + taskId);
         }
 	}
 }
