@@ -30,6 +30,7 @@ class Command {
 		let location = newLocation ? newLocation : 'tasks';
 		database.ref(location + '/' + taskId).update({
 			id: taskData.id,
+			user: taskData.user,
 			userid: taskData.userid,
 			username: taskData.username,
 			title: taskData.title,
@@ -59,9 +60,9 @@ class Command {
 	}
 
 	// Comments
-	addCommentToTask(database, taskId, commentData, commentId) {
-		database.ref('tasks/' + taskId + '/comments/' + commentId).update({
-			id: commentId,
+	addCommentToTask(database, taskId, commentData) {
+		database.ref('tasks/' + taskId + '/comments/' + commentData.id).update({
+			id: commentData.id,
 			from: commentData.from,
 			name: commentData.name,
 			message: commentData.message,

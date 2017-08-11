@@ -166,8 +166,8 @@ class Firebase {
     }
 
     // Comments
-    addComment(taskId, comment, uuid) {
-        Command.addCommentToTask(this.database, taskId, comment, uuid);
+    addComment(taskId, commentData) {
+        Command.addCommentToTask(this.database, taskId, commentData);
     }
 
     addReplyToComment(taskId, comment, reply, uuid) {

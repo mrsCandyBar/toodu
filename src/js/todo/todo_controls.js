@@ -2,13 +2,19 @@ import TodoModel from './todo_model.js';
 
 class TodoControls {
 
-	retrieveTodos($scope, store, uuid) {
+	retrieveTodos($scope, store, uuid, taskid) {
 		let todoList = $scope;
 		todoList.allFilters = _retrieve('search');
 	    todoList.allTasks = _retrieveTodos(store.tasks);
 
-	    if (store.user.admin) {
+	    if (taskid) {
+            todoList.currentTask = this.retrieveSingleTodo(taskid, todoList.allTasks);
+
+		} else {
             todoList.currentTask = this.createTodo(store.user);
+		}
+
+	    if (store.user.admin) {
             todoList.taskFilters = this.retrieveTodoStates();
 		}
 
@@ -39,13 +45,13 @@ class TodoControls {
 	    return todo;
 	}
 
-    update($scope) {
+    update($scope, taskId) {
 		let checkUsername = JSON.stringify($scope.user);
         if (checkUsername.indexOf('{') === -1) {
         	return 'Please select a user';
 
         } else {
-            if ($scope.id === 0) {
+            if ($scope.id === 0 || taskId == 'create') {
                 let UUID = this.genUUID.v4();
                 $scope.id = UUID;
             }
@@ -62,7 +68,7 @@ class TodoControls {
 
 function _retrieve(method, property) {
 
-	console.log('property >>>', property)
+	console.log('property >>>', method, property)
 
 	if (method === 'search') {
 		let emptyModel = new TodoModel([]);

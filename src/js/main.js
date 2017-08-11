@@ -42,8 +42,10 @@ var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'angula
     }
   });
 
-  todoApp.controller('homeControls',     function($rootScope, $scope, $location, $route)       {
-      Pages.home($rootScope, $scope, $location, $route, Firebase); });
+  todoApp.controller('homeControls',     function($rootScope, $scope, $location, $route){
+      Pages.home($rootScope, $scope, $location, $route, Firebase);
+  });
 
-  todoApp.controller('dashboardControls', function($scope, $route, $location, $rootScope, uuid)       {
-        new Dashboard().init(Firebase, TodoControls, $scope, $route, $location, 'tasks', $rootScope, uuid, Store); });
+  todoApp.controller('dashboardControls', function($scope, $route, $location, $rootScope, uuid){
+      new Dashboard().init(Firebase, TodoControls, $scope, $route, $location, 'tasks', $rootScope, uuid, Store);
+  });

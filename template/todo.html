@@ -46,19 +46,19 @@
             </li>
           </ul>
 
-          <article>
+          <!--<article>
             <h5>reply</h5>
             <textarea ng-model="reply[comment.id].message" class="form-control"></textarea>
             <button ng-click="replyToComment(comment.id)" class="btn btn-sm btn-default">Reply</button>
-          </article>
+          </article>-->
         </li>
       </ul>
 
       <article>
         <br><br>
-        <h5>Comment : {{ user.name }}</h5>
+        <h5>Comment : {{ comment.name }}</h5>
         <textarea ng-model="comment.message" class="form-control"></textarea>
-        <button ng-click="addComment()" class="btn btn-sm btn-default">Comment</button>
+        <button ng-click="addComment(comment)" class="btn btn-sm btn-default">Comment</button>
       </article>
     </section>
     <!-- /comments section -->

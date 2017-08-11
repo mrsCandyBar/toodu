@@ -12,6 +12,13 @@ angular
 
             controller: function($scope) {
 
+                $scope.comment = {
+                    name: $scope.user && $scope.user.name ? $scope.user.name : '',
+                    from: $scope.user && $scope.user.id ? $scope.user.id : '',
+                    message: '',
+                    id: 0
+                }
+
                 $scope.$watch('task.editable', function() {
                    if ($scope.task && $scope.task.editable) {
                        let unalteredTask = JSON.stringify($scope.task);
@@ -35,7 +42,13 @@ angular
                     $scope.$emit('newTaskData', $scope.task);
                 }
 
-                $scope.addComment = function()		{ task.addComment($scope, $scope.Firebase) }
+                $scope.addComment = function(commentData)		{
+                    commentData.id = new Date().getTime();
+                    commentData.name = !commentData.name ? $scope.user.name : commentData.name;
+                    commentData.from = !commentData.from ? $scope.comment.id : commentData.from;
+
+                    $scope.$emit('addComment', commentData);
+                }
 
 
                 $scope.moveTodo = function() 		{ $scope.moveTodo($scope, $scope.Firebase, $scope.$route, $scope.$location) }

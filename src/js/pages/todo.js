@@ -20,26 +20,6 @@ class Todo {
 		this.Firebase = Firebase;
 	}
 
-    update($scope, Firebase) {
-		if ($scope.todo.user.indexOf('{') > -1) {
-			let user = JSON.parse($scope.todo.user);
-			$scope.todo.username = user['name'];
-			$scope.todo.user = user['id'];
-		}
-
-		let compareObj = JSON.stringify($scope.todo);
-		if ($scope.backup != compareObj) {
-		  $scope.backup = JSON.stringify($scope.todo);
-		  Firebase.updateTask(JSON.parse(compareObj));
-		}
-
-	    $scope.taskDates.total = moment($scope.todo.dateEnd).fromNow();
-	}
-
-    cancel($scope) {
-	    $scope.todo = JSON.parse($scope.backup);
-	}
-
 	moveTodo($scope, Firebase, $route, $location) {
 		let compareObj = JSON.stringify($scope.todo); 
 		let location = $scope.todo.isActive === true ? 'archive' : 'tasks';
@@ -61,14 +41,6 @@ class Todo {
 		history.back();
 	}
 
-	// Comments Section
-	addComment($scope, Firebase) {
-		let buildComment = $scope.comment;
-		buildComment.from = this.user.id;
-		buildComment.name = this.user.name;
-
-		Firebase.addComment($scope.todo.id, buildComment, new Date().getTime());
-	}
 
 	replyToComment($scope, commentId, Firebase) {
 		let buildReply = $scope.reply[commentId];

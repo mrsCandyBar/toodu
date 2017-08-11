@@ -2,14 +2,14 @@ import Home from './pages/home.js';
 
 class Pages {
 
-	home($scope, $location, $route, Firebase) {
+	home($rootScope, $scope, $location, $route, Firebase) {
 		let homeObj = new Home();
 		$scope = _buildScope(homeObj, $scope);
 
 		$scope.$watch('hasAccount',function() {
 			homeObj.toggleAction($scope);
 		}, true);
-		$scope.submit = function() { homeObj.submit(Firebase, $route, $location, $scope); }
+		$scope.submit = function() { homeObj.submit(Firebase, $route, $location, $scope, $rootScope); }
 		$scope.logout = function() { homeObj.logout(Firebase); }
 	};
 }
