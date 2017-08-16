@@ -14,6 +14,7 @@ class Firebase {
         this.firebase = initDB();
         this.database = this.firebase.database()
         this.auth = this.firebase.auth();
+        this.user;
 	}
 
 	// If user has not logged out and is still in the same tab
@@ -87,24 +88,16 @@ class Firebase {
     }
 
     // Get user info
-    retrieveUserInfo() {
-        let dataRetrieved = new Promise((resolve, reject) => {
-            Query.data(this.database, 'users/' + this.userID).then((userData) =>{
-                this.user = userData;
-                this.searchFilters = _returnSearchFilters(userData.admin, userData.organisation, this.userID);
+    retrieveUserInfo($rootScope) {
+        this.database
+            .ref('/users/' + this.userID)
+            .on('value', function(snapshot) {
+                let userData = snapshot.val() ? snapshot.val() : [];
+                $rootScope.$broadcast('userDataUpdated', userData);
 
-                if (userData.admin) {
-                  this.otherUsers = this._retrieveUsers().then(() => { resolve(userData);
-                  }, error => { resolve(userData); });
-
-                } else { resolve(userData); }
-
-            }, (error) => {
-                reject('problem fetching user data', error)
+            }, function(err) {
+                console.log('denied >>>', err);
             });
-        });
-
-        return dataRetrieved
     }
 
     // retrieve tasks
@@ -125,36 +118,21 @@ class Firebase {
         });
     }
 
-    // retrieve users
-    _retrieveUsers() {
-        let dataRetrieved = new Promise((resolve, reject) => {
-            Query.dataWithSpecificResults(this.database, 'users/', 'organisation', this.user.organisation).then((users) => {
-
-                let userArray = [];
-                if (users && users !== null && typeof users === 'object') {
-                    Object.keys(users).forEach((user) => {
-                        userArray[userArray.length] = users[user];
-                    });
-                }
-
-                let updated = _hasListBeenUpdated(this.allUsers, userArray);
-                if (updated) {
-                    this.allUsers = userArray;
-                    resolve(this.allUsers);
-                }
-                reject('No changes to user data');
-
-            }, (error) => {
-                reject(error);
-            });
-        });
-
-        return dataRetrieved;
-    }
-
     // update task
     updateTask(taskData) {
-        Command.updateTask(this.database, taskData.id, taskData, '');
+        Command.updateTask(this.database, taskData.id, taskData, 'tasks');
+    }
+
+    updateMyTasks(watchTasks, userId) {
+        Command.updateMyTasks(this.database, watchTasks, userId);
+    }
+
+    notifyTaskUser(taskUpdate) {
+	    Command.updateUserNotification(this.database, taskUpdate, taskUpdate.taskCreator.id)
+    }
+
+    removeNote(note, userId) {
+        Command.removeUserNote(this.database, note, userId)
     }
 
     moveTask(taskData, location) {
@@ -168,6 +146,14 @@ class Firebase {
     // Comments
     addComment(taskId, commentData) {
         Command.addCommentToTask(this.database, taskId, commentData);
+    }
+
+    notifyTaskHolders(commentData) {
+        Command.notifyTaskHolders(this.database, commentData);
+    }
+
+    addReplyAndNotifyCommenter(replyData) {
+        Command.addReplyAndNotifyCommenter(this.database, replyData);
     }
 
     addReplyToComment(taskId, comment, reply, uuid) {
@@ -187,15 +173,6 @@ class Firebase {
 
       firebase.initializeApp(config);
       return firebase;
-  }
-
-  function _returnSearchFilters(isAdmin, organisation, userId) {
-      let task = {
-          filter: isAdmin ? 'organisation' : 'user',
-          value : isAdmin ? organisation : userId
-      }
-
-      return task;
   }
 
   function _hasListBeenUpdated(listOld, listNew) {

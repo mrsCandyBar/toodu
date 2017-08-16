@@ -1,138 +1,177 @@
 class Dashboard {
 
-	init(Firebase, TodoControls, $scope, $route, $location, activity, $rootScope, uuid, Store) {
+	init(Firebase, TodoControls, $scope, $route, $location, activity, $rootScope, Store) {
 
-        if (Store.user) {
-            $scope.allFilters = Store.allFilters;
-            $scope.allTasks = Store.allTasks;
-            $scope.currentTask = Store.currentTask;
-            $scope.taskFilters = Store.taskFilters;
-            $scope.user = Store.user;
-            $scope.taskFilters.users = Store.otherUsers;
+        $scope.userIsSignedIn = window.sessionStorage.password && window.sessionStorage.email ? true : false;
+        if (!$scope.userIsSignedIn) {
+            setTimeout(() => {
+                $location.path('home/');
+                $route.reload();
+            }, 2000);
 
-            if ($route.current.params.filter && ($route.current.params.filter != 'create')) {
-                console.log('page reload?');
-                $scope.currentTask = TodoControls.retrieveSingleTodo($route.current.params.filter, $scope.allTasks);
-                Store.currentTask.user = findUser(Store.otherUsers, Store.currentTask.userid);
-                $scope.currentTask = Store.currentTask.user;
-            }
+        } else {
+            if (Store.user) {
+                $scope.allFilters = Store.allFilters;
+                $scope.allTasks = Store.allTasks;
+                $scope.currentTask = Store.currentTask;
+                $scope.taskFilters = Store.taskFilters;
+                $scope.user = Store.user;
 
-            if ($route.current.params.filter != 'create') {
-                $scope.currentTask = TodoControls.createTodo($scope.user);
-            }
-        }
-
-		// Listen for user to log in
-        $scope.$on('userLoggedIn', function(event){
-
-            // Get user info
-			Firebase.retrieveUserInfo().then(() => {
-				$scope.user = Firebase.user;
-				if ($scope.user.admin) {
-                    $scope.otherUsers = Firebase.allUsers;
-                }
-
-                // Retrieve tasks
-				Firebase.retrieveTasks($rootScope, activity);
-			});
-        });
-
-        // Listen for tasks retrieved
-        $scope.$on('userTasksUpdated', function(event, data){
-
-            if (!Firebase.tasks) {
-
-                Firebase.tasks = data;
-
-                let taskID = 0;
-                if ($route.current.params.filter && ($route.current.params.filter != 'create')) {
-                    taskID = $route.current.params.filter;
-                }
-                let updateTasks = TodoControls.retrieveTodos($scope,Firebase, uuid, taskID);
-
-                console.log('Apply! >>>', Firebase.tasks, updateTasks);
-
-                $scope.$apply(function () {
-                    $scope = updateTasks;
-                    $scope.taskFilters.users = $scope.otherUsers;
-
-                    Store.allFilters = $scope.allFilters;
-                    Store.allTasks = $scope.allTasks;
+                if ($route.current.params.filter && ($route.current.params.filter != 'create' && $route.current.params.filter != 'welcome')) {
+                    $scope.currentTask = TodoControls.retrieveSingleTodo($route.current.params.filter, $scope.allTasks);
                     Store.currentTask = $scope.currentTask;
-                    Store.taskFilters = $scope.taskFilters;
-                    Store.user = $scope.user;
-                    Store.otherUsers = $scope.otherUsers;
+                }
 
-                    if ($route.current.params.filter && ($route.current.params.filter != 'create')) {
-                        Store.currentTask.user = findUser(Store.otherUsers, Store.currentTask.userid);
-                    }
-                });
+                if ($route.current.params.filter === 'create') {
+                    $scope.currentTask = TodoControls.createTodo($scope.user);
+                }
+            }
+
+            // Listen for user to log in
+            if ($route.current.params.filter === 'welcome') {
+                Firebase.retrieveUserInfo($rootScope);
 
             } else {
-                Firebase.tasks = data;
+                $scope.$on('userLoggedIn', function (event) {
+                    Firebase.retrieveUserInfo($rootScope);
+                });
+            }
 
-                function updateDOM() {
-                    let taskID = 0;
-                    if ($route.current.params.filter && ($route.current.params.filter != 'create')) {
-                        taskID = $route.current.params.filter;
-                    }
-                    let updateTasks = TodoControls.retrieveTodos($scope,Firebase, uuid, taskID);
-                    $scope.allTasks = updateTasks.allTasks;
-                    if ($route.current.params.filter == 'create') {
-                        $scope.currentTask = Store.currentTask;
-                    }
+            $scope.$on('userDataUpdated', function (event, userData) {
 
-                    Store.allTasks = $scope.allTasks;
-                    Store.currentTask = $scope.currentTask;
-                    if ($route.current.params.filter && ($route.current.params.filter != 'create')) {
-                        Store.currentTask.user = findUser(Store.otherUsers, Store.currentTask.userid);
-                    }
+                function replaceAndBackupUserData(data) {
+                    Firebase.user = data;
+                    Firebase.searchFilters = {
+                        filter: 'organisation',
+                        value: data.organisation
+                    };
+                    $scope.user = Firebase.user;
+                    Store.user = $scope.user;
+                    console.log('user data updated!', data);
                 }
 
-                if(!$scope.$$phase) {
-                    $scope.$apply(function() {
-                        console.log('new data!! >>> non phase', Store);
-                        updateDOM();
+                if (!Firebase.tasks) {
+                    replaceAndBackupUserData(userData);
+                    Firebase.retrieveTasks($rootScope, activity);
+
+                    if ($route.current.params.filter === 'welcome') {
+                        $location.path('dashboard/');
+                    }
+
+                } else {
+                    if (!$scope.$$phase) {
+                        $scope.$apply(function () {
+                            replaceAndBackupUserData(userData);
+                        });
+
+                    } else {
+                        replaceAndBackupUserData(userData);
+                    }
+                }
+            });
+
+            $scope.$on('updateTaskCreator', function (event, taskUpdate) {
+                Firebase.notifyTaskUser(taskUpdate);
+            });
+
+            $scope.removeNote = function (note) {
+                Firebase.removeNote(note, $scope.user.id);
+            }
+
+
+            // Listen for tasks retrieved
+            $scope.$on('userTasksUpdated', function (event, data) {
+
+                if (!Firebase.tasks) {
+                    Firebase.tasks = data;
+
+                    let taskID = 0;
+                    if ($route.current.params.filter && ($route.current.params.filter != 'create' && $route.current.params.filter != 'welcome')) {
+                        taskID = $route.current.params.filter;
+                    }
+                    let updateTasks = TodoControls.retrieveTodos($scope, Firebase, taskID);
+
+                    $scope.$apply(function () {
+                        $scope = updateTasks;
+
+                        Store.allFilters = $scope.allFilters;
+                        Store.allTasks = $scope.allTasks;
+                        Store.currentTask = $scope.currentTask;
+                        Store.otherUsers = $scope.otherUsers;
+                        Store.taskFilters = $scope.taskFilters;
+                        Store.user = $scope.user;
                     });
 
                 } else {
-                    updateDOM();
-                    console.log('new data! >>>', Store);
-                    $scope.$broadcast('updateArrayEvent');
+                    Firebase.tasks = data;
+
+                    function updateDOM() {
+                        let taskID = 0;
+                        if ($route.current.params.filter && ($route.current.params.filter != 'create' && $route.current.params.filter != 'welcome')) {
+                            taskID = $route.current.params.filter;
+                        }
+                        let updateTasks = TodoControls.retrieveTodos($scope, Firebase, taskID);
+                        $scope.allTasks = updateTasks.allTasks;
+                        if ($route.current.params.filter == 'create') {
+                            $scope.currentTask = Store.currentTask;
+                        }
+
+                        Store.allTasks = $scope.allTasks;
+                        Store.currentTask = $scope.currentTask;
+                    }
+
+                    if (!$scope.$$phase) {
+                        $scope.$apply(function () {
+                            updateDOM();
+                        });
+
+                    } else {
+                        updateDOM();
+                        $scope.$broadcast('updateArrayEvent');
+                    }
                 }
+            });
+
+            $scope.$on('newTaskData', function (event, data) {
+                Store.currentTask = data;
+                if ($route.current.params.filter === 'create') {
+                    $scope.view($scope.currentTask.id);
+                }
+                Firebase.updateTask(data);
+            });
+
+            $scope.$on('updateMyTasks', function (event, data) {
+                Firebase.updateMyTasks(data, $scope.user.id);
+            });
+
+            $scope.$on('deleteTask', function (event, taskID) {
+                Firebase.deleteTask(taskID, 'tasks');
+                $scope.view('');
+            });
+
+            $scope.$on('addComment', function (event, commentData) {
+                Firebase.addComment($scope.currentTask.id, commentData);
+            });
+
+            $scope.$on('notifyTaskHolders', function (event, commentData) {
+                Firebase.notifyTaskHolders(commentData);
+            });
+
+            $scope.$on('addReply', function (event, replyData) {
+                Firebase.addReplyAndNotifyCommenter(replyData);
+            })
+
+            $scope.view = function (taskId) {
+                $location.path('dashboard/' + taskId);
             }
-        });
 
-        $scope.$on('newTaskData', function(event, data) {
-            let updateTask = TodoControls.update(data, $route.current.params.filter);
-            Store.currentTask = updateTask;
-
-            if (updateTask == 'Please select a user') {
-                alert(updateTask);
-            } else {
-                console.log('new data >>>', updateTask);
-                Firebase.updateTask(updateTask);
+            $scope.logout = function () {
+                Firebase.logOut().then(() => {
+                    location.reload();
+                });
             }
-        });
-
-        $scope.$on('addComment', function(event, commentData) {
-            Firebase.addComment($scope.currentTask.id, commentData);
-        });
-
-        $scope.view = function(taskId) {
-            $location.path('dashboard/' + taskId);
         }
 	}
-}
-
-function findUser(allUsers, userID) {
-    for (let i = 0; i < allUsers.length; i++) {
-        if (allUsers[i]['id'] === userID) {
-            return allUsers[i];
-        }
-    }
-
-    return 'Select a User';
 }
 
 module.exports = Dashboard;

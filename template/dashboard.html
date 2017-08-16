@@ -1,21 +1,66 @@
-<article class="contentHolder">
+<article class="contentHolder" ng-if="userIsSignedIn">
 
-	<!-- <h1 ng-show="user.name">
+	<menu>
+		<li>
+			<h5>My Tasks</h5>
+			<ul class="taskList">
+				<li ng-repeat="task in user.tasks" class="taskList__holder" ng-click="view(task.id)">
+					<div >{{ task.title }} (started {{ task.started | fromNow }})</div>
+				</li>
+			</ul>
+		</li>
+
+		<li>
+			<h5>Messages</h5>
+			<ul class="taskList">
+				<li ng-repeat="notification in user.notify" class="taskList__holder">
+
+					<!-- Task now has user-->
+					<div ng-if="!notification.message && notification.assigneeName != 'available'"
+						 ng-click="view(notification.taskId)">
+						{{ notification.assigneeName }} has accepted {{ notification.taskName }}.
+						<span>{{ notification.date | fromNow }}</span>
+					</div>
+
+					<!-- Task now has lost a user -->
+					<div ng-if="!notification.message && notification.assigneeName === 'available'"
+						 ng-click="view(notification.taskId)">
+						{{ notification.taskName }} can now be assigned a new user.
+						<span>{{ notification.date | fromNow }}</span>
+					</div>
+
+					<!-- Task has recieved a comment -->
+					<div ng-if="notification.message" ng-click="view(notification.task.id)">
+						{{ notification.name }} commented on {{ notification.for.taskTitle}}. <br>
+						{{ notification.message }}<br>
+						<span>{{ notification.date | fromNow }}</span>
+					</div>
+
+					<span class="btn btn-xs btn-default"
+						  ng-click="notification.message ? removeNote(notification.id) : removeNote(notification.date)">
+								remove note</span>
+				</li>
+			</ul>
+		</li>
+
+		<li ng-click="logout()">Logout</li>
+	</menu>
+
+	<h1 ng-show="user.name">
 		<small>Welcome</small>
 		<span>{{ user.name }}</span>
-		<small ng-show="user.admin"><i>(admin)</i></small><br> 
 		<small>{{ user.email }}</small><br>
 		<small>org: {{ user.organisation }}</small>
-	</h1> -->
+	</h1>
 
 	<h1 ng-show="allTasks && allTasks.length > 0"
 		class="ucase">
-			Task List
-			<a ng-show="user.admin && allTasks" href="index.html#!/dashboard/create" class="btn btn-primary">
+		{{ user.organisation }}'s Task List
+			<a ng-show="allTasks" href="index.html#!/dashboard/create" class="btn btn-primary">
 				create task</a></h1>
 
+
 	<section class="contentHolder__btn-holder" ng-show="allTasks && allTasks.length > 0">
-	
 		<span ng-show="allTasks.length > 6">
 			Filter 
 			<a ng-repeat="filter in allFilters"
@@ -23,29 +68,38 @@
 				href="index.html#!/dashboard/{{ filter }}">
 				{{ filter }}
 			</a>
-		
 			<br><br>
 		</span>
 	
 		<ul class="taskList">
 			<li ng-repeat="task in allTasks" class="taskList__holder" ng-click="view(task.id)">
-				
 				<a 	class="taskList__holder--title status__{{ task.status}} urgency__{{ task.urgency }}">
 					{{ task.title }}
 				</a><br>
-	
-				<div ng-show="user.admin" class="taskList__holder--user status__{{ task.status }} urgency__{{ task.urgency }}">
+				<div class="taskList__holder--user status__{{ task.status }} urgency__{{ task.urgency }}">
 					{{ task.username }}
 					(<i>{{ task.status }}</i>) </div>
 			</li>
 		</ul>
 	</section>
 
-	<h3 ng-show="allTasks.length === 0"><br>No Todos</h3>
+
+	<h3 ng-show="allTasks.length === 0"><br>No Todos for Today
+		<a href="index.html#!/dashboard/create" class="btn btn-primary">
+			create a new task</a>
+	</h3>
 	<h3 ng-show="!allTasks"><br>Loading</h3>
-
-	<!-- Create -->
 	<todo model="currentTask" filters="taskFilters" member="user"></todo>
-	<!--<create model="newTask"></create>-->
 
+</article>
+
+<article ng-if="!userIsSignedIn">
+	<h1>Goodbye, <br>see you soon :)</h1>
+	<script>
+		console.log('location >>>', window.location);
+        window.setTimeout(function() {
+		    window.location = "/";
+
+		}, 300);
+	</script>
 </article>

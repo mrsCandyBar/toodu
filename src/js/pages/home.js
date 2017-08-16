@@ -4,9 +4,6 @@ class Home {
 	constructor() {
 		this.isSignedIn = window.sessionStorage.password && window.sessionStorage.email ? true : false;
 		this.hasAccount = false;
-		this.user = {
-			admin : false
-		};
 		this.error;
 		this.action = 'create my account';
 	}
@@ -18,8 +15,10 @@ class Home {
 	submit(Firebase, $route, $location, $scope, $rootScope) {
 		if ($scope.hasAccount) {
 			Firebase.logIn($rootScope, $scope.user).then(
-				(response) => { _redirect($route, $location, 'overview') }, 
-				(error) => {
+				(response) => {
+                    this._redirectToDashboard($route, $location);
+
+				}, (error) => {
 					$scope.$apply(function () { 
 						$scope.error = 'Sorry, login failed. Try again';
 					});
@@ -27,8 +26,10 @@ class Home {
 
 		} else {
 			Firebase.create($scope.user).then(
-				(response) => { _redirect($route, $location, 'overview') }, 
-				(error) => {
+				(response) => {
+					this._redirectToDashboard($route, $location);
+
+				}, (error) => {
 					$scope.$apply(function () { 
 						$scope.error = error;
 					});
@@ -36,14 +37,11 @@ class Home {
 		}
 	}
 
-	logout(Firebase) {
-		Firebase.logOut().then(() => { location.reload() });
+	_redirectToDashboard($route, $location) {
+		console.log('YAY!!!!');
+        $location.path('dashboard/welcome')
+        $route.reload();
 	}
-}
-
-function _redirect($route, $location, routeValue) {
-	if ($location && routeValue) { $location.path(routeValue); }
-	$route.reload();
 }
 
 module.exports = Home;

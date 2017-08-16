@@ -12,7 +12,7 @@ import AngularUUID from 'angular-uuid';
 // Set single menu items
 // differentiate between string and obj for dropdown items {page: 'about', list: []}
 var menuItems = Menu.buildMenu(['home', 'dashboard']);
-var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'angular-uuid', 'editInHTML', 'dropdownComponent', 'todoComponent'])
+var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'angular-uuid', 'editInHTML', 'dropdownComponent', 'todoComponent', 'fromNowComponent'])
 
   .config(function($routeProvider) { 
     
@@ -46,6 +46,6 @@ var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'angula
       Pages.home($rootScope, $scope, $location, $route, Firebase);
   });
 
-  todoApp.controller('dashboardControls', function($scope, $route, $location, $rootScope, uuid){
-      new Dashboard().init(Firebase, TodoControls, $scope, $route, $location, 'tasks', $rootScope, uuid, Store);
+  todoApp.controller('dashboardControls', function($scope, $route, $location, $rootScope){
+      new Dashboard().init(Firebase, TodoControls, $scope, $route, $location, 'tasks', $rootScope, Store);
   });

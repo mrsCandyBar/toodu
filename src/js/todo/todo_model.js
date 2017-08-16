@@ -6,9 +6,16 @@ class TodoModel extends ModelProto {
 		super();
 
 		this.id = '';
-		this.user = 'Select a User';
-        this.userid = '';
-		this.username = '';
+		this.createdby = {
+			name: '',
+			id: '',
+		};
+        this.assignee = {
+        	name: 'available',
+			id: '',
+			start: '',
+			end: ''
+		};
 		this.title = 'Your Title goes here...';
 		this.description = 'Your description starts here, click to select the text of the title and of the description';
 		this.organisation = '';
@@ -32,7 +39,7 @@ class TodoModel extends ModelProto {
 
 	getStates(property) {
 		let states = {
-			status: 	['Waiting', 'Busy', 'Done', 'Hold'],
+			status: 	['Waiting', 'Busy', 'Done', 'Completed', 'Hold'],
 			urgency: 	['Waiting', 'Important', 'Urgent', 'Done', 'Hold']
 		}
 		return states;

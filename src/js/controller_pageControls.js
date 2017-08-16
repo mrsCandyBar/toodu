@@ -10,7 +10,7 @@ class Pages {
 			homeObj.toggleAction($scope);
 		}, true);
 		$scope.submit = function() { homeObj.submit(Firebase, $route, $location, $scope, $rootScope); }
-		$scope.logout = function() { homeObj.logout(Firebase); }
+
 	};
 }
 

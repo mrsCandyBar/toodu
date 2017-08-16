@@ -2,7 +2,7 @@ import TodoModel from './todo_model.js';
 
 class TodoControls {
 
-	retrieveTodos($scope, store, uuid, taskid) {
+	retrieveTodos($scope, store, taskid) {
 		let todoList = $scope;
 		todoList.allFilters = _retrieve('search');
 	    todoList.allTasks = _retrieveTodos(store.tasks);
@@ -10,15 +10,19 @@ class TodoControls {
 	    if (taskid) {
             todoList.currentTask = this.retrieveSingleTodo(taskid, todoList.allTasks);
 
+            if (todoList.currentTask.comments != 1) {
+                let getCommentsLength = 0;
+                Object.keys(todoList.currentTask.comments).forEach((key) => {
+					getCommentsLength++;
+				});
+                todoList.currentTask.allComments = getCommentsLength;
+            }
+
 		} else {
             todoList.currentTask = this.createTodo(store.user);
 		}
 
-	    if (store.user.admin) {
-            todoList.taskFilters = this.retrieveTodoStates();
-		}
-
-		this.genUUID = uuid;
+	    todoList.taskFilters = this.retrieveTodoStates();
 	    return todoList;
 	}
 
@@ -32,7 +36,6 @@ class TodoControls {
 
     retrieveSingleTodo(index, allTasks) {
         let task = findTask(allTasks, 'id', index);
-        console.log('single >>>', task);
         task = _retrieve('single', task);
 
 	    return task;
@@ -44,32 +47,9 @@ class TodoControls {
     	todo.organisation = user.organisation;
 	    return todo;
 	}
-
-    update($scope, taskId) {
-		let checkUsername = JSON.stringify($scope.user);
-        if (checkUsername.indexOf('{') === -1) {
-        	return 'Please select a user';
-
-        } else {
-            if ($scope.id === 0 || taskId == 'create') {
-                let UUID = this.genUUID.v4();
-                $scope.id = UUID;
-            }
-
-            let newTask = JSON.stringify($scope);
-            newTask = JSON.parse(newTask);
-            let user = $scope.user;
-            newTask.username = user['name'];
-            newTask.userid = user['id'];
-            return newTask;
-        }
-    }
 }
 
 function _retrieve(method, property) {
-
-	console.log('property >>>', method, property)
-
 	if (method === 'search') {
 		let emptyModel = new TodoModel([]);
 		return emptyModel.getModelFilters(emptyModel)

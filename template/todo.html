@@ -1,14 +1,11 @@
 <article class="contentHolder">
 
   <ul class="pagination">
-    <li><a onclick="history.back()">Back</a></li>
-    <li><a  ng-if="user.admin"
-            ng-show="!task.editable && task.status === 'Done'"
+    <li><a  ng-show="!task.editable && task.status === 'Done' && task.createdby.id === user.id"
             ng-click="moveTodo()">
               {{ task.isActive === true ? 'Archive' : 'Activate' }}</a></li>
 
-    <li><a  ng-if="user.admin"
-            ng-show="!task.editable"
+    <li><a  ng-show="!task.editable && task.createdby.id === user.id""
             ng-click="deleteTodo()">
               Delete</a></li>
   </ul>
@@ -19,11 +16,28 @@
       <em>
         {{ task.title }}
         <small>({{ task.urgency }})</small>
+
       </em>
 
       <small><br>
         {{ taskDates.total }}
-        <small><br>Assigned to : {{ task.username }} ({{ task.status }})</small>
+        <small><br>Created  by : {{ task.createdby.name }} </small>
+
+        <div ng-show="task.assignee.id === user.id" class="editTodo">
+          <section class="container editTodo__dropdowns">
+            <div class="row">
+              <div> Status Update </div>
+              <dropdown options="filter.status" selected="task.status"></dropdown>
+            </div>
+          </section>
+          <span class="btn btn-small btn-primary" ng-show="task.assignee.id === user.id" ng-click="accept(false)">Decline Task</span>
+        </div>
+
+        <div ng-show="task.assignee.id != user.id">
+          <span class="btn btn-small btn-primary" ng-show="task.assignee.name === 'available'" ng-click="accept(true)">Accept Task</span>
+          <small ng-show="task.assignee.name != 'available'"><br>Accepted  by : {{ task.assignee.name }} ({{ task.status }})</small>
+        </div>
+
       </small>
     </h1>
     <p>{{ task.description }}</p>
@@ -31,26 +45,25 @@
 
     <!-- Comments section -->
     <section class="contentHolder__comments">
-      <span ng-show="task.comments">{{task.comments.length}} comments</span>
-      <ul ng-show="task.comments"
-              class="unstyled">
-        <li ng-repeat="comment in task.comments">
+      <span ng-show="task.comments.length != 1">{{task.allComments}} comments</span>
+      <ul ng-show="task.comments.length != 1" class="unstyled">
+        <li ng-repeat="comment in task.comments" id="{{ comment.id }}">
           <h5>{{ comment.name }} said</h5>
           <p>{{ comment.message }}</p>
 
           <!-- Reply to response -->
           <ul class="unstyled">
-            <li ng-repeat="reply in comment.reply">
+            <li ng-repeat="reply in comment.reply" id="{{ reply.id }}">
               <h5>{{ reply.name }} said</h5>
               <p>{{ reply.message }}</p>
             </li>
           </ul>
 
-          <!--<article>
+          <article>
             <h5>reply</h5>
-            <textarea ng-model="reply[comment.id].message" class="form-control"></textarea>
-            <button ng-click="replyToComment(comment.id)" class="btn btn-sm btn-default">Reply</button>
-          </article>-->
+            <textarea ng-model="reply.message" class="form-control"></textarea>
+            <button ng-click="replyToComment(reply, comment)" class="btn btn-sm btn-default">Reply</button>
+          </article>
         </li>
       </ul>
 
@@ -64,7 +77,7 @@
     <!-- /comments section -->
 
     <br><br>
-    <button class="btn btn-primary" ng-click="task.editable = true">Edit</button>
+    <button class="btn btn-primary" ng-show="task.createdby.id === user.id" ng-click="task.editable = true">Edit</button>
   </section>
 
 
@@ -72,33 +85,23 @@
   <section ng-show="task.editable">
     <div class="editTodo">
 
-      <section class="editTodo__duration" ng-if="user.admin">
+      <section class="editTodo__duration">
         <datepicker info="task.dateStart"></datepicker>
         &nbsp;&nbsp; To &nbsp;&nbsp; <datepicker info="task.dateEnd"></datepicker>
       </section>
 
-      <h1 class="editTodo__title" ng-if="user.admin">
+      <h1 class="editTodo__title">
         <p ng-model="task.title" contenteditable="true"> {{ task.title }}</p>
       </h1>
 
       <section class="container editTodo__dropdowns">
         <div class="row">
-          <div> Status </div>
-          <dropdown options="filter.status" selected="task.status"></dropdown>
-        </div>
-
-        <div class="row" ng-if="user.admin">
           <div> Urgency </div>
           <dropdown options="filter.urgency" selected="task.urgency"></dropdown>
         </div>
-
-        <div class="row" ng-if="user.admin">
-          <div> User </div>
-          <dropdown options="filter.users" selected="task.user"></dropdown>
-        </div>
       </section>
 
-      <p ng-if="task.user.admin" ng-model="task.description" contenteditable="true"> {{ task.description }}</p>
+      <p ng-model="task.description" contenteditable="true"> {{ task.description }}</p>
     </div>
 
     <br><br>
