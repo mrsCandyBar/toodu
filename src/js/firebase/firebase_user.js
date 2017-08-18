@@ -48,7 +48,6 @@ class User {
 		return passwordStatus;
 	}
 
-
 	changeEmailAddress(email) {
 		let resetEmail = new Promise ((resolve, reject) => {
 			firebase.auth().sendPasswordResetEmail(email).then(function() {

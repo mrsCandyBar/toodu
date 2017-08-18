@@ -13,29 +13,22 @@ class TodoControls {
                 Object.keys(todoList.currentTask.comments).forEach((key) => {
 					getCommentsLength++;
 				});
-                todoList.currentTask.allComments = getCommentsLength;
-            }
+
+                todoList.currentTask.allComments = getCommentsLength; }
 
 		} else {
-            todoList.currentTask = this.createTodo(store.user);
-		}
+	    	todoList.currentTask = this.createTodo(store.user); }
 
 	    todoList.taskFilters = this.retrieveTodoStates();
 	    return todoList;
 	}
 
-	retrieveTodoFilters() {
-		return _retrieve('search');
-	}
-
-	retrieveTodoStates() {
-		return _retrieve('state');
-	}
+	retrieveTodoFilters() { return _retrieve('search'); }
+	retrieveTodoStates() { return _retrieve('state'); }
 
     retrieveSingleTodo(taskData, allTasks) {
         let task = findTask(allTasks, taskData);
         task = _retrieve('single', task);
-
         return task;
     }
 
@@ -66,24 +59,20 @@ function _retrieveTodos(rawObj) {
             Object.keys(rawObj[todoObj]).forEach((innertodoObj) => {
                 let currentTodo = rawObj[todoObj][innertodoObj];
 
-                buildMap[todoObj][buildMap[todoObj].length] = new TodoModel(currentTodo);
-
-            })
+                buildMap[todoObj][buildMap[todoObj].length] = new TodoModel(currentTodo); })
         });
 
 		return buildMap;
 
 	} else {
-	  return [];
-	}
+	  return []; }
 }
 
 function findTask(allTasks, taskData) {
 	if (allTasks[taskData.location]) {
         for (let i = 0; i < allTasks[taskData.location].length; i++) {
             if (allTasks[taskData.location][i]['id'] == [taskData.id]) {
-                return allTasks[taskData.location][i];
-            }
+                return allTasks[taskData.location][i]; }
         }
     }
 

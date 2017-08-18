@@ -1,10 +1,6 @@
-import ModelProto from './model.js';
-
-class TodoModel extends ModelProto {
+class TodoModel {
 
 	constructor(rawObj) {
-		super();
-
 		this.id = '';
 		this.createdby = {
 			name: '',
@@ -45,6 +41,24 @@ class TodoModel extends ModelProto {
 		}
 		return states;
 	}
+
+    createModel(rawObj) {
+        Object.keys(rawObj).forEach((rawObjKey) => {
+            Object.keys(this).forEach((modelKey) => {
+                if (modelKey === rawObjKey) {
+                    this[modelKey] = rawObj[rawObjKey];
+                }
+            });
+        });
+    }
+
+    getModelFilters(rawObj) {
+        let filters = [];
+        Object.keys(rawObj).forEach((key) => {
+            filters[filters.length] = key;
+        });
+        return filters;
+    }
 }
 
 module.exports = TodoModel;
