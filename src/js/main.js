@@ -1,51 +1,43 @@
-import Menu from './controller_menuControls.js';
-import Pages from './controller_pageControls.js';
-
+import Home from './pages/home.js';
 import Dashboard from './pages/dashboard.js';
-import TodoControls from './todo/todo_controls.js';
 import Firebase from './firebase/firebase.js';
 import Store from './store.js';
 
-import AngularUUID from 'angular-uuid';
+var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'editInHTML', 'dropdownComponent', 'todoComponent', 'fromNowComponent'])
 
+  .config(function($routeProvider) {
+        $routeProvider
+            .when('/home', {
+                controller: 'homeControls',
+                templateUrl: 'template/home.html',
+            })
+            .when('/dashboard', {
+                controller: 'dashboardControls',
+                templateUrl: 'template/dashboard.html',
+            })
+                .when('/dashboard/:filter', {
+                    controller: 'dashboardControls',
+                    templateUrl: 'template/dashboard.html',
+                })
+                    .when('/task/:filter/:id', {
+                        controller: 'dashboardControls',
+                        templateUrl: 'template/dashboard.html',
+                    })
 
-// Set single menu items
-// differentiate between string and obj for dropdown items {page: 'about', list: []}
-var menuItems = Menu.buildMenu(['home', 'dashboard']);
-var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'angular-uuid', 'editInHTML', 'dropdownComponent', 'todoComponent', 'fromNowComponent'])
-
-  .config(function($routeProvider) { 
-    
-    Menu.setRoutesWithBuiltMenu($routeProvider, menuItems); 
-
-    // set custom urls
-    $routeProvider
-      .when('/dashboard/:filter', {
-        controller: 'dashboardControls',
-        templateUrl: 'template/dashboard.html',
-      })
-
-    // set route for unknown routes
-    $routeProvider
-      .otherwise({
-        redirectTo:'/home'
-      })
+            .otherwise({
+                redirectTo:'/home'
+            })
   });
 
-  // MENU
-  todoApp.controller('menuControls', function($rootScope, $route) { 
-    Menu.initMenu(this, $rootScope, menuItems);
-    
-    if (window.sessionStorage.length > 0) {
-      this.loggedIn = true;
-      Firebase.autoLogin($rootScope, $route);
-    }
-  });
-
-  todoApp.controller('homeControls',     function($rootScope, $scope, $location, $route){
-      Pages.home($rootScope, $scope, $location, $route, Firebase);
+  todoApp.controller('homeControls', function($rootScope, $scope, $location, $route){
+      new Home().init(Firebase, $rootScope, $scope, $location, $route);
   });
 
   todoApp.controller('dashboardControls', function($scope, $route, $location, $rootScope){
-      new Dashboard().init(Firebase, TodoControls, $scope, $route, $location, 'tasks', $rootScope, Store);
+      if (window.sessionStorage.length > 0) {
+          this.loggedIn = true;
+          Firebase.autoLogin($rootScope, $route);
+      }
+
+      new Dashboard().init(Firebase, $rootScope, $scope, $route, $location, 'tasks', Store);
   });

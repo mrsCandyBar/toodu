@@ -24,6 +24,7 @@ class TodoModel extends ModelProto {
 		this.comments = 0;
 		this.isActive = true;
 		this.editable = true;
+		this.location = '';
 		this.getDate();
 		this.createModel(rawObj);
 	}

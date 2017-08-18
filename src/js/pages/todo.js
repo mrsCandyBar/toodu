@@ -19,36 +19,6 @@ class Todo {
 		this.reply = [];
 		this.Firebase = Firebase;
 	}
-
-	moveTodo($scope, Firebase, $route, $location) {
-		let compareObj = JSON.stringify($scope.todo); 
-		let location = $scope.todo.isActive === true ? 'archive' : 'tasks';
-		Firebase.moveTask(JSON.parse(compareObj), location);
-
-		if ($scope.todo.isActive === true) {
-			$location.path(location);
-
-		} else {
-			$scope.editable = true;
-			$scope.todo.status = 'Waiting';
-		}
-		
-	}
-
-	deleteTodo($scope, Firebase) {
-		let location = $scope.todo.isActive === true ? 'tasks' : 'archive';
-		Firebase.deleteTask($scope.todo.id, location);
-		history.back();
-	}
-
-
-	replyToComment($scope, commentId, Firebase) {
-		let buildReply = $scope.reply[commentId];
-		buildReply.from = this.user.id;
-		buildReply.name = this.user.name;
-
-		Firebase.addReplyToComment($scope.todo.id, commentId, buildReply, new Date().getTime());
-	}
 }
 
 module.exports = Todo;

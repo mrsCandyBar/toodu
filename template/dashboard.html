@@ -4,8 +4,8 @@
 		<li>
 			<h5>My Tasks</h5>
 			<ul class="taskList">
-				<li ng-repeat="task in user.tasks" class="taskList__holder" ng-click="view(task.id)">
-					<div >{{ task.title }} (started {{ task.started | fromNow }})</div>
+				<li ng-repeat="thisTask in user.tasks" class="taskList__holder" ng-click="view(thisTask.task.location, thisTask.id)">
+					<div >{{ thisTask.task.title }} (started {{ thisTask.started | fromNow }})</div>
 				</li>
 			</ul>
 		</li>
@@ -13,32 +13,19 @@
 		<li>
 			<h5>Messages</h5>
 			<ul class="taskList">
-				<li ng-repeat="notification in user.notify" class="taskList__holder">
+				<li ng-repeat="task in user.notify" class="taskList__holder">
+					<div ng-repeat="note in task">
 
-					<!-- Task now has user-->
-					<div ng-if="!notification.message && notification.assigneeName != 'available'"
-						 ng-click="view(notification.taskId)">
-						{{ notification.assigneeName }} has accepted {{ notification.taskName }}.
-						<span>{{ notification.date | fromNow }}</span>
+						<h5 ng-if="$index === 0" ng-click="view(note.task.location, note.task.id)">{{ note.task.title}}</h5>
+
+						<note>
+							<p ng-click="view(note.task.location, note.task.id)">{{ note.message }}</p>
+							<span>{{ note.date | fromNow }}</span>
+							<span class="btn btn-xs btn-default"
+								  ng-click="removeNote(note)">
+									remove note</span>
+						</note>
 					</div>
-
-					<!-- Task now has lost a user -->
-					<div ng-if="!notification.message && notification.assigneeName === 'available'"
-						 ng-click="view(notification.taskId)">
-						{{ notification.taskName }} can now be assigned a new user.
-						<span>{{ notification.date | fromNow }}</span>
-					</div>
-
-					<!-- Task has recieved a comment -->
-					<div ng-if="notification.message" ng-click="view(notification.task.id)">
-						{{ notification.name }} commented on {{ notification.for.taskTitle}}. <br>
-						{{ notification.message }}<br>
-						<span>{{ notification.date | fromNow }}</span>
-					</div>
-
-					<span class="btn btn-xs btn-default"
-						  ng-click="notification.message ? removeNote(notification.id) : removeNote(notification.date)">
-								remove note</span>
 				</li>
 			</ul>
 		</li>
@@ -60,25 +47,25 @@
 				create task</a></h1>
 
 
-	<section class="contentHolder__btn-holder" ng-show="allTasks && allTasks.length > 0">
+	<section class="contentHolder__btn-holder"><!-- ng-show="allTasks && allTasks.length > 0"-->
 		<span ng-show="allTasks.length > 6">
 			Filter 
-			<a ng-repeat="filter in allFilters"
-				class="btn btn-sm btn-default {{ current.params.filter === filter ? 'active' : ''}}" 
-				href="index.html#!/dashboard/{{ filter }}">
-				{{ filter }}
+			<a ng-repeat="thisFilter in allFilters"
+				class="btn btn-sm btn-default {{ current.params.filter === thisFilter ? 'active' : ''}}"
+				href="index.html#!/dashboard/{{ thisFilter }}">
+				{{ thisFilter }}
 			</a>
 			<br><br>
 		</span>
 	
 		<ul class="taskList">
-			<li ng-repeat="task in allTasks" class="taskList__holder" ng-click="view(task.id)">
-				<a 	class="taskList__holder--title status__{{ task.status}} urgency__{{ task.urgency }}">
-					{{ task.title }}
+			<li ng-repeat="thisTask in allTasks.active" class="taskList__holder" ng-click="view('active', thisTask.id)">
+				<a 	class="taskList__holder--title status__{{ thisTask.status}} urgency__{{ thisTask.urgency }}">
+					{{ thisTask.title }}
 				</a><br>
-				<div class="taskList__holder--user status__{{ task.status }} urgency__{{ task.urgency }}">
-					{{ task.username }}
-					(<i>{{ task.status }}</i>) </div>
+				<div class="taskList__holder--user status__{{ thisTask.status }} urgency__{{ thisTask.urgency }}">
+					{{ thisTask.username }}
+					(<i>{{ thisTask.status }}</i>) </div>
 			</li>
 		</ul>
 	</section>
@@ -89,17 +76,11 @@
 			create a new task</a>
 	</h3>
 	<h3 ng-show="!allTasks"><br>Loading</h3>
+
 	<todo model="currentTask" filters="taskFilters" member="user"></todo>
 
 </article>
 
 <article ng-if="!userIsSignedIn">
 	<h1>Goodbye, <br>see you soon :)</h1>
-	<script>
-		console.log('location >>>', window.location);
-        window.setTimeout(function() {
-		    window.location = "/";
-
-		}, 300);
-	</script>
 </article>

@@ -1,7 +1,6 @@
 
 import Authorize from './firebase_authorization.js';
 import User from './firebase_user.js';
-import Query from './firebase_queries.js';
 import Command from './firebase_commands.js';
 
 class Firebase {
@@ -29,12 +28,12 @@ class Firebase {
     }
 
     // Create a new user
-    create(userData) {
+    create($rootScope, userData) {
         let createUser = new Promise((resolve, reject) => {
             User.create(userData).then((data) => {
                 Command.addUser(this.database, data.uid, userData);
 
-                this.logIn(userData).then((response) => {
+                this.logIn($rootScope, userData).then((response) => {
                     resolve(response);
                 }, (error) => {
                     console.log('user created but signIn failed >>', error);
@@ -102,63 +101,34 @@ class Firebase {
 
     // retrieve tasks
     retrieveTasks($rootScope, activity) {
-	    let TaskUpdater = this.tasks;
-
         this.database
-            .ref('/' + activity)
-            .orderByChild(this.searchFilters.filter)
-            .equalTo(this.searchFilters.value)
+            .ref('/tasks/' + this.searchFilters.value)
             .on('value', function(snapshot) {
-                let updates = snapshot.val() ? snapshot.val() : [];
-                TaskUpdater = updates;
-                $rootScope.$broadcast('userTasksUpdated', updates);
+            let updates = snapshot.val() ? snapshot.val() : [];
+            $rootScope.$broadcast('userTasksUpdated', updates);
 
-            }, function(err) {
-                console.log('denied >>>', err);
-        });
+        }, function(err) { console.log('denied >>>', err); });
     }
 
     // update task
-    updateTask(taskData) {
-        Command.updateTask(this.database, taskData.id, taskData, 'tasks');
+    updateTask(taskData)                        { Command.updateTask(this.database, taskData); }
+    updateMyTasks(watchTasks, userId)           { Command.updateMyTasks(this.database, watchTasks, userId); }
+    deleteTask(taskData)                        { Command.deleteTask(this.database, taskData); }
+
+    moveTask(taskData) {
+        Command.moveTask(this.database, taskData);
+        Command.sendUserNotification(this.database, taskData.updateContributers);
+    }
+    updateTaskHoldersOfLocationChange(taskData) {
+        Command.updateTaskHoldersOfLocationChange(this.database, taskData);
     }
 
-    updateMyTasks(watchTasks, userId) {
-        Command.updateMyTasks(this.database, watchTasks, userId);
-    }
-
-    notifyTaskUser(taskUpdate) {
-	    Command.updateUserNotification(this.database, taskUpdate, taskUpdate.taskCreator.id)
-    }
-
-    removeNote(note, userId) {
-        Command.removeUserNote(this.database, note, userId)
-    }
-
-    moveTask(taskData, location) {
-        Command.moveTask(this.database, taskData.id, taskData, location);
-    }
-
-    deleteTask(taskId, location) {
-        Command.deleteTask(this.database, taskId, location);
-    }
 
     // Comments
-    addComment(taskId, commentData) {
-        Command.addCommentToTask(this.database, taskId, commentData);
-    }
-
-    notifyTaskHolders(commentData) {
-        Command.notifyTaskHolders(this.database, commentData);
-    }
-
-    addReplyAndNotifyCommenter(replyData) {
-        Command.addReplyAndNotifyCommenter(this.database, replyData);
-    }
-
-    addReplyToComment(taskId, comment, reply, uuid) {
-        Command.addReplyToCommentInTask(this.database, taskId, comment, reply, uuid);
-    }
+    sendUserNotification(commentData)           { Command.sendUserNotification(this.database, commentData); }
+    removeNote(note)                            { Command.removeSingleUserNote(this.database, note) }
+    addComment(commentData)                     { Command.addReplyAndNotifyCommenter(this.database, commentData); }
+    addReplyAndNotifyCommenter(replyData)       { Command.addReplyAndNotifyCommenter(this.database, replyData); }
   }
 
   function initDB() {

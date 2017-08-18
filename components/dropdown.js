@@ -1,6 +1,5 @@
 
 angular.module('dropdownComponent', [])
- 
   .directive('dropdown', function() {
     return {
       	restrict: 'E',
@@ -44,7 +43,6 @@ angular.module('dropdownComponent', [])
             	let selected = JSON.stringify($scope.selectedOption);
 
             	if (selected.indexOf('{') > -1) {
-                    console.log('broadcast recieved >>', $scope.selectedOption);
                     $scope.selectedOption = $scope.selectedOption.name ? $scope.selectedOption.name : $scope.selectedOption;
 				}
 			});

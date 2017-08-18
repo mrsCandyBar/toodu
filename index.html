@@ -29,31 +29,6 @@
   <body class="container">
 
     <canvas id="myCanvas" resize></canvas>
-
-    <header class="row">
-      <section class="col header__menuToggle toggle--closed mobileOnly">
-        <button class="btn btn-default">
-          <span class="icon-bar"></span>
-        </button>
-      </section>
-
-      <nav class="header__menu toggle--closed">
-        <ul class="nav nav-pills" ng-controller="menuControls as menu" ng-show="menu.loggedIn">
-          
-          <li class="{{ item.isActive ? 'active' : '' }}" ng-repeat="item in menu.items">
-            <a href="{{ item.url }}" ng-click="menu.select(item)">{{ item.page }}</a>
-
-            <ul ng-show="item['submenu']">
-              <li ng-repeat="subItem in item['submenu']">
-                <a href="{{ subItem.url }}" ng-click="menu.select(subItem)">{{ subItem.page }}</a>
-              </li>
-            </ul>
-          </li>
-
-        </ul>
-      </nav>
-    </header>
-
     <main id="main" ng-view class="row"></main>
 
   </body>

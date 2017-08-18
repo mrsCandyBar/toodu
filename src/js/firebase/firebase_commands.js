@@ -24,9 +24,8 @@ class Command {
 		database.ref('users/' + userId).remove();
 	}
 
-	updateTask(database, taskId, taskData, newLocation) {
-		let location = newLocation ? newLocation : 'tasks';
-		database.ref(location + '/' + taskId).update({
+	updateTask(database, taskData) {
+		database.ref('tasks/' + taskData.organisation + '/' + taskData.location + '/' + taskData.id).update({
 			id: taskData.id,
 			createdby: taskData.createdby,
             assignee: taskData.assignee,
@@ -35,8 +34,9 @@ class Command {
 			organisation: taskData.organisation,
 			status: taskData.status,
 			comments: taskData.comments,
-			isActive: taskData.isActive,
+			isActive: taskData.move ? taskData.move : taskData.isActive,
             editable: false,
+            location: taskData.location,
 			urgency: taskData.urgency,
 			dateStart: taskData.dateStart,
 			dateEnd: taskData.dateEnd
@@ -48,36 +48,38 @@ class Command {
             tasks: watchTasks,
         });
     }
-
-    updateUserNotification(database, taskUpdate, userId) {
-        database.ref('users/' + userId + '/notify/' + taskUpdate.date).update({
-            assigneeId: taskUpdate.taskAssignee.id,
-            assigneeName: taskUpdate.taskAssignee.name,
-			taskId: taskUpdate.taskId,
-			taskName: taskUpdate.taskName,
-			date: taskUpdate.date
-        });
-    }
-
-    removeUserNote(database, note, userId) {
-        database.ref('users/' + userId + '/notify/' + note).remove();
-    }
-
-	deleteTask(database, taskId, location) {
-		database.ref(location + '/' + taskId).remove();
+    updateTaskHoldersOfLocationChange(database, taskData) {
+		for (let i = 0; i < taskData.users.length; i++) {
+			database.ref('users/' + taskData['users'][i] + '/tasks/' + taskData['id'] + '/task/').update({
+                location: taskData['location'],
+            });
+		}
 	}
 
-	moveTask(database, taskId, taskData, newLocation) {
-		let removeLocation = newLocation === 'archive' ? 'tasks' : 'archive';
-		taskData.isActive = (newLocation === 'archive') ? false : true;
-		
-		this.updateTask(database, taskId, taskData, newLocation);
-		this.deleteTask(database, taskId, removeLocation);
+	deleteTask(database, taskData) {
+		database.ref('tasks/' + taskData.organisation + '/' + taskData.location + '/' + taskData.id).remove();
+		for (let i = 0; i < taskData.users.length; i++) {
+            this.removeUserNotesForTask(database, taskData.users[i], taskData.id);
+        }
+	}
+
+	moveTask(database, taskData) {
+		let taskId = taskData.id;
+		let newLocation = taskData.move.location;
+		let removeLocation = (newLocation === 'active') ? newLocation : 'active';
+
+        taskData.location = newLocation;
+		this.updateTask(database, taskData);
+        taskData.location = removeLocation;
+		this.deleteTask(database, taskData);
 	}
 
 	// Comments
-	addCommentToTask(database, taskId, commentData) {
-		database.ref('tasks/' + taskId + '/comments/' + commentData.id).update({
+	addCommentToTask(database, commentData) {
+		let url = 'active/' + commentData.task.id + '/comments/' + commentData.id;
+		if (commentData.origin) { url = 'active/' + commentData.task.id + '/comments/' + commentData.origin + '/reply/' + commentData.id; }
+
+		database.ref('tasks/' + commentData.task.org + '/' + url).update({
 			id: commentData.id,
 			from: commentData.from,
 			name: commentData.name,
@@ -86,47 +88,34 @@ class Command {
 		});
 	}
 
-    notifyTaskHolders(database, commentData) {
-
-		for (let i = 0; i < commentData.for.id.length; i++) {
-            database.ref('users/' + commentData.for.id[i] + '/notify/' + commentData.date).update({
-                id: commentData.date,
+	// Notes
+    sendUserNotification(database, commentData) {
+        for (let i = 0; i < commentData.for.length; i++) {
+            database.ref('users/' + commentData.for[i] + '/notify/' + commentData.task.id + '/' + commentData.id).update({
+                id: commentData.id,
                 from: commentData.from,
                 name: commentData.name,
                 message: commentData.message,
                 for: commentData.for,
-                date: commentData.date,
-				task: {
-					title: commentData.for.taskTitle,
-					id: commentData.id
-				}
+                task: {
+                    title: commentData.task.title,
+                    id: commentData.task.id,
+					location: commentData.task.location,
+					org: commentData.task.org
+                }
             });
-		}
+        }
     }
 
     addReplyAndNotifyCommenter(database, replyData) {
-		this.addReplyToCommentInTask(database, replyData.task.id, replyData.for.commentId, replyData.id, replyData);
-        for (let i = 0; i < replyData.for.id.length; i++) {
-            database.ref('users/' + replyData.for.id[i] + '/notify/' + replyData.id).update({
-                id: replyData.id,
-                from: replyData.from,
-                name: replyData.name,
-                message: replyData.message,
-                for: replyData.for,
-                date: replyData.date,
-				task: replyData.task
-            });
-        }
+		console.log('replyData >>', replyData);
+		this.addCommentToTask(database, replyData);
+        this.sendUserNotification(database, replyData);
 	}
 
-	addReplyToCommentInTask(database, taskId, commentId, replyId, replyData) {
-		database.ref('tasks/' + taskId + '/comments/' + commentId + '/reply/' + replyId).update({
-			id: replyData.id,
-			from: replyData.from,
-			name: replyData.name,
-			message: replyData.message
-		});
-	}
+    removeUserNotesForTask(database, userId, noteId) 	{ database.ref('users/' + userId + '/notify/' + noteId).remove(); }
+    removeSingleUserNote(database, note) 				{ database.ref('users/' + note.for[0] + '/notify/' + note.task.id + '/' + note.id).remove();
+    }
 }
 
 module.exports = new Command();

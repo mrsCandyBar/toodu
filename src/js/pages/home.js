@@ -1,46 +1,42 @@
 
 class Home {
 
-	constructor() {
-		this.isSignedIn = window.sessionStorage.password && window.sessionStorage.email ? true : false;
-		this.hasAccount = false;
-		this.error;
-		this.action = 'create my account';
-	}
+	init(Firebase, $rootScope, $scope, $location, $route) {
+        $scope.isSignedIn = window.sessionStorage.password && window.sessionStorage.email ? true : false;
+        $scope.hasAccount = false;
+        $scope.error;
+        $scope.action;
 
-	toggleAction($scope) {
-		$scope.action = $scope.hasAccount === true ? 'login' : 'create my account';
-	}
+        if ($scope.isSignedIn) {
+            _redirectToDashboard($route, $location);
+        }
 
-	submit(Firebase, $route, $location, $scope, $rootScope) {
-		if ($scope.hasAccount) {
-			Firebase.logIn($rootScope, $scope.user).then(
-				(response) => {
-                    this._redirectToDashboard($route, $location);
+        $scope.$watch('hasAccount',function() 	{
+            $scope.action = ($scope.hasAccount === true) ? 'login' : 'create my account';
+		}, true);
 
-				}, (error) => {
-					$scope.$apply(function () { 
-						$scope.error = 'Sorry, login failed. Try again';
-					});
-				});
+        $scope.login = function() {
 
-		} else {
-			Firebase.create($scope.user).then(
-				(response) => {
-					this._redirectToDashboard($route, $location);
+            if ($scope.hasAccount) {
+                Firebase.logIn($rootScope, $scope.user).then(
+                    (response) => { _redirectToDashboard($route, $location);
+                    }, (error) => {
+                        $scope.$apply(function () { $scope.error = 'Sorry, login failed. Try again'; });
+                    });
 
-				}, (error) => {
-					$scope.$apply(function () { 
-						$scope.error = error;
-					});
-				})
-		}
-	}
+            } else {
+                Firebase.create($rootScope, $scope.user).then(
+                    (response) => { _redirectToDashboard($route, $location);
+                    }, (error) => {
+                        $scope.$apply(function () { $scope.error = error; });
+                    });
+            }
+        }
 
-	_redirectToDashboard($route, $location) {
-		console.log('YAY!!!!');
-        $location.path('dashboard/welcome')
-        $route.reload();
+        function _redirectToDashboard($route, $location) {
+            $location.path('dashboard/welcome')
+            $route.reload();
+        }
 	}
 }
 

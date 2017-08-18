@@ -9,7 +9,6 @@ angular.module('datePickerComponent', [])
       		newDate: '=info'
       	},
       	controller: function($scope) {
-
       		document.getElementById("main").onclick = function () {
       			if ($scope.menuStatus === 'isOpen') {
       				$scope.menuStatus = 'isClosed';
@@ -18,7 +17,6 @@ angular.module('datePickerComponent', [])
       		};
 
       		$scope.menuStatus = 'isClosed';
-
 	      	$scope.dp_createDays = function(monthTitle, amount) {
 				let month = {
 					title: monthTitle,

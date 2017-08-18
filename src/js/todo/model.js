@@ -3,7 +3,6 @@ class ModelProto {
 
 	createModel(rawObj) {
 		Object.keys(rawObj).forEach((rawObjKey) => {
-			/*console.log('rawObj >>> model', rawObjKey);*/
 			Object.keys(this).forEach((modelKey) => {
 				if (modelKey === rawObjKey) {
 					this[modelKey] = rawObj[rawObjKey];
