@@ -51,7 +51,7 @@ angular
                             $scope.task.id = new Date().getTime();
                             $scope.task.createdby.name = $scope.user.name;
                             $scope.task.createdby.id = $scope.user.id;
-                            $scope.task.organisation = $scope.user.organisation;
+                            $scope.task.group = $scope.user.group;
                             $scope.task.location = 'active';
                         }
 
@@ -95,7 +95,7 @@ angular
                                     id: $scope.task.id,
                                     location: $scope.task.location,
                                     urgency: $scope.task.urgency,
-                                    org: $scope.task.organisation
+                                    group: $scope.task.group
                                 }
                             }
                         }
@@ -132,7 +132,7 @@ angular
                         // Delete Task
                         let thisTask = {
                                 id: $scope.task.id,
-                                org: $scope.task.organisation,
+                                group: $scope.task.group,
                                 location: $scope.task.location,
                                 users: _listMembers('AllUsersInTask') }
 
@@ -141,15 +141,15 @@ angular
 
                     $scope.moveTodo = function (moveStatus) {
                         // Move Task
-                        $scope.task.isActive = ($scope.task.isActive === true) ? false : true;
                         $scope.task.move = {
                             status : moveStatus,
                             activity: $scope.task.isActive,
-                            location: !$scope.task.isActive ? moveStatus : 'active',
+                            location: ($scope.task.isActive === true) ? moveStatus : 'active',
                             date: new Date().getTime()
                         };
-                        $scope.task.location = !$scope.task.isActive ? moveStatus : 'active';
+                        $scope.task.location = ($scope.task.isActive === true) ? 'active' : moveStatus;
                         $scope.task.users = _listMembers('AllUsersInTask');
+                        $scope.task.isActive = $scope.task.isActive === true ? false : true;
 
                         // Update users of task status
                         let massMessage = {
@@ -182,8 +182,8 @@ angular
                         task: {
                             title: $scope.task.title,
                             id: $scope.task.id,
-                            location: $scope.task.isActive === true ? 'active' : $scope.task.isActive.location,
-                            org: $scope.user.organisation
+                            location: $scope.task.isActive === true ? 'active' : $scope.task.move.location,
+                            group: $scope.user.group
                         },
                         message: messageData
                     }

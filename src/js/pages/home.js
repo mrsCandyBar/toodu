@@ -12,7 +12,12 @@ class Home {
         }
 
         $scope.$watch('hasAccount',function() 	{
-            $scope.action = ($scope.hasAccount === true) ? 'login' : 'create my account';
+            let loginText = {
+                true: 'login',
+                false: 'create my account',
+                createGroup: 'create group'
+            };
+            $scope.action = loginText[$scope.hasAccount];
 		}, true);
 
         $scope.login = function() {

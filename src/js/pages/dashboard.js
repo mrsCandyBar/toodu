@@ -58,13 +58,19 @@ class Dashboard {
             $scope.$on('userDataUpdated', function (event, userData) {
 
                 function replaceAndBackupUserData(data) {
-                    Firebase.user = data;
-                    Firebase.searchFilters = {
-                        filter: 'organisation',
-                        value: data.organisation
-                    };
-                    $scope.user = Firebase.user;
-                    Store.user = $scope.user;
+                    if (data.group != $scope.user.group &&
+                        ($scope.user.group && $scope.user.group.length > 0)) {
+                        location.reload();
+
+                    } else {
+                        Firebase.user = data;
+                        Firebase.searchFilters = {
+                            filter: 'group',
+                            value: data.group
+                        };
+                        $scope.user = Firebase.user;
+                        Store.user = $scope.user;
+                    }
                 }
 
                 if (!Firebase.tasks) {
@@ -161,7 +167,9 @@ class Dashboard {
             })
 
             $scope.$on('updateTaskActivity', function(event, data) {
+                console.log('data >>>', data);
                 Firebase.moveTask(data);
+                //$scope.view(data.move.location, data.id);
             })
 
             $scope.$on('deleteTask', function (event, task) {
@@ -182,6 +190,23 @@ class Dashboard {
                 Firebase.logOut().then(() => {
                     location.reload();
                 });
+            }
+
+            $scope.updateUserDetails = function(user) {
+                Firebase.updateUserInfo(user);
+            }
+
+            $scope.switchGroup = function() {
+                if (!$scope.user.hideGroup) {
+                    $scope.user.hideGroup = $scope.user.group;
+                    $scope.user.group = $scope.user.id;
+                } else {
+                    $scope.user.group = $scope.user.hideGroup;
+                    $scope.user.hideGroup = '';
+                }
+
+                Firebase.updateUserGroup($scope.user);
+                location.reload();
             }
         }
 	}

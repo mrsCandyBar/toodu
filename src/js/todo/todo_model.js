@@ -14,7 +14,7 @@ class TodoModel {
 		};
 		this.title = 'Your Title goes here...';
 		this.description = 'Your description starts here, click to select the text of the title and of the description';
-		this.organisation = '';
+		this.group = '';
 		this.status = 'Waiting';
 		this.urgency = 'Waiting';
 		this.comments = 0;

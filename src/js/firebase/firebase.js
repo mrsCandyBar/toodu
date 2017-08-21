@@ -99,8 +99,19 @@ class Firebase {
             });
     }
 
+    // Update user info
+    updateUserInfo(userData) {
+	    Command.updateUser(this.database, userData);
+    }
+
+    // Update user group
+    updateUserGroup(userData) {
+        Command.updateUserGroup(this.database, userData);
+    }
+
     // retrieve tasks
-    retrieveTasks($rootScope, activity) {
+    retrieveTasks($rootScope) {
+        console.log('start task retrieval', this.searchFilters.value);
         this.database
             .ref('/tasks/' + this.searchFilters.value)
             .on('value', function(snapshot) {

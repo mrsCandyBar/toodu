@@ -6,35 +6,51 @@ class Command {
 			id: userId,
 			name: userData.name,
 			email: userData.email,
-			organisation: userData.organisation,
 			password: userData.password
 		});
 	}
 
-	updateUser(database, userId, userData) {
-		database.ref('users/' + userId).update({
-			id: userId,
-			name: userData.name,
-			email: userData.email,
-			organisation: userData.organisation
+    addGroup(database, groupId, groupData) {
+        database.ref('users/' + groupId).set({
+            id: groupId,
+            name: groupData.name,
+            email: groupData.email,
+            password: groupData.password
+        });
+    }
+
+    updateUser(database, userData) {
+		database.ref('users/' + userData.id).update({
+			name: userData.update.name ? userData.update.name : userData.name,
+			group: userData.update.group ? userData.update.group : userData.group,
+			email: userData.update.email ? userData.update.email : userData.email
 		});
 	}
+
+    updateUserGroup(database, userData) {
+        database.ref('users/' + userData.id).update({
+            group: userData.group ? userData.group : userData.group,
+            hideGroup: userData.hideGroup ? userData.hideGroup : ''
+        });
+    }
 
 	removeUser(database, userId) {
 		database.ref('users/' + userId).remove();
 	}
 
 	updateTask(database, taskData) {
-		database.ref('tasks/' + taskData.organisation + '/' + taskData.location + '/' + taskData.id).update({
+		console.log('updates >>>', database, taskData)
+		database.ref('tasks/' + taskData.group + '/' + taskData.location + '/' + taskData.id).update({
 			id: taskData.id,
 			createdby: taskData.createdby,
             assignee: taskData.assignee,
 			title: taskData.title,
 			description: taskData.description,
-			organisation: taskData.organisation,
+            group: taskData.group,
 			status: taskData.status,
 			comments: taskData.comments,
-			isActive: taskData.move ? taskData.move : taskData.isActive,
+			isActive: taskData.isActive,
+			move: taskData.move ? taskData.move : {},
             editable: false,
             location: taskData.location,
 			urgency: taskData.urgency,
@@ -57,7 +73,7 @@ class Command {
 	}
 
 	deleteTask(database, taskData) {
-		database.ref('tasks/' + taskData.organisation + '/' + taskData.location + '/' + taskData.id).remove();
+		database.ref('tasks/' + taskData.group + '/' + taskData.location + '/' + taskData.id).remove();
 		for (let i = 0; i < taskData.users.length; i++) {
             this.removeUserNotesForTask(database, taskData.users[i], taskData.id);
         }
@@ -66,7 +82,7 @@ class Command {
 	moveTask(database, taskData) {
 		let taskId = taskData.id;
 		let newLocation = taskData.move.location;
-		let removeLocation = (newLocation === 'active') ? newLocation : 'active';
+		let removeLocation = taskData.location;
 
         taskData.location = newLocation;
 		this.updateTask(database, taskData);
@@ -79,7 +95,7 @@ class Command {
 		let url = 'active/' + commentData.task.id + '/comments/' + commentData.id;
 		if (commentData.origin) { url = 'active/' + commentData.task.id + '/comments/' + commentData.origin + '/reply/' + commentData.id; }
 
-		database.ref('tasks/' + commentData.task.org + '/' + url).update({
+		database.ref('tasks/' + commentData.task.group + '/' + url).update({
 			id: commentData.id,
 			from: commentData.from,
 			name: commentData.name,
@@ -101,7 +117,7 @@ class Command {
                     title: commentData.task.title,
                     id: commentData.task.id,
 					location: commentData.task.location,
-					org: commentData.task.org
+                    group: commentData.task.group
                 }
             });
         }

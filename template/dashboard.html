@@ -15,9 +15,7 @@
 			<ul class="taskList">
 				<li ng-repeat="task in user.notify" class="taskList__holder">
 					<div ng-repeat="note in task">
-
 						<h5 ng-if="$index === 0" ng-click="view(note.task.location, note.task.id)">{{ note.task.title}}</h5>
-
 						<note>
 							<p ng-click="view(note.task.location, note.task.id)">{{ note.message }}</p>
 							<span>{{ note.date | fromNow }}</span>
@@ -37,29 +35,54 @@
 		<small>Welcome</small>
 		<span>{{ user.name }}</span>
 		<small>{{ user.email }}</small><br>
-		<small>org: {{ user.organisation }}</small>
+
+		<small ng-if="user.group != user.id">group: {{ user.group }}
+			<a ng-click="switchGroup()" class="btn btn-xs btn-default">personal</a></small>
+
+		<small ng-if="user.group === user.id">personal
+			<a ng-click="switchGroup()" class="btn btn-xs btn-default">group</a></small>
+
+
+		<p ng-model="user.update.name" contenteditable="true"></p>
+		<p ng-model="user.update.group" contenteditable="true"></p>
+		<a ng-click="updateUserDetails(user)" class="btn btn-xs btn-default">Update</a>
 	</h1>
 
 	<h1 ng-show="allTasks && allTasks.length > 0"
 		class="ucase">
-		{{ user.organisation }}'s Task List
+		{{ user.group }}'s Task List
 			<a ng-show="allTasks" href="index.html#!/dashboard/create" class="btn btn-primary">
 				create task</a></h1>
 
 
 	<section class="contentHolder__btn-holder"><!-- ng-show="allTasks && allTasks.length > 0"-->
-		<span ng-show="allTasks.length > 6">
-			Filter 
-			<a ng-repeat="thisFilter in allFilters"
-				class="btn btn-sm btn-default {{ current.params.filter === thisFilter ? 'active' : ''}}"
-				href="index.html#!/dashboard/{{ thisFilter }}">
-				{{ thisFilter }}
-			</a>
-			<br><br>
-		</span>
-	
+		Active
 		<ul class="taskList">
 			<li ng-repeat="thisTask in allTasks.active" class="taskList__holder" ng-click="view('active', thisTask.id)">
+				<a 	class="taskList__holder--title status__{{ thisTask.status}} urgency__{{ thisTask.urgency }}">
+					{{ thisTask.title }}
+				</a><br>
+				<div class="taskList__holder--user status__{{ thisTask.status }} urgency__{{ thisTask.urgency }}">
+					{{ thisTask.username }}
+					(<i>{{ thisTask.status }}</i>) </div>
+			</li>
+		</ul>
+
+		Hold
+		<ul class="taskList">
+			<li ng-repeat="thisTask in allTasks.hold" class="taskList__holder" ng-click="view('hold', thisTask.id)">
+				<a 	class="taskList__holder--title status__{{ thisTask.status}} urgency__{{ thisTask.urgency }}">
+					{{ thisTask.title }}
+				</a><br>
+				<div class="taskList__holder--user status__{{ thisTask.status }} urgency__{{ thisTask.urgency }}">
+					{{ thisTask.username }}
+					(<i>{{ thisTask.status }}</i>) </div>
+			</li>
+		</ul>
+
+		Complete
+		<ul class="taskList">
+			<li ng-repeat="thisTask in allTasks.complete" class="taskList__holder" ng-click="view('complete', thisTask.id)">
 				<a 	class="taskList__holder--title status__{{ thisTask.status}} urgency__{{ thisTask.urgency }}">
 					{{ thisTask.title }}
 				</a><br>

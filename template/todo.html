@@ -74,7 +74,7 @@
                 </li>
               </ul>
 
-              <article>
+              <article ng-show="task.isActive === true">
                 <h5>reply</h5>
                 <textarea ng-model="reply.message" class="form-control"></textarea>
                 <button ng-click="replyToComment(reply, comment)" class="btn btn-sm btn-default">Reply</button>
@@ -82,7 +82,7 @@
             </li>
           </ul>
 
-          <article>
+          <article ng-show="task.isActive === true">
             <br><br>
             <h5>Your Comment</h5>
             <textarea ng-model="comment.message" class="form-control"></textarea>

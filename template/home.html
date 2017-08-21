@@ -5,21 +5,31 @@
 	<section ng-show="!isSignedIn">
 
 		<ul class="pagination">
-          	<li class="{{ hasAccount ? 'active' : '' }}">
-            	<a class="{{ hasAccount ? 'active' : '' }}" ng-click="hasAccount = true">
+          	<li class="{{ hasAccount === true ? 'active' : '' }}">
+            	<a class="{{  hasAccount === true ? 'active' : '' }}" ng-click="hasAccount = true">
 					Login
              		</a></li>
 
-           	<li class="{{ hasAccount ? '' : 'active' }}">
-            	<a class="{{ hasAccount ? '' : 'active' }}" ng-click="hasAccount = false">
+           	<li class="{{ hasAccount === false ? 'active' : '' }}">
+            	<a class="{{  hasAccount === false ? 'active' : '' }}" ng-click="hasAccount = false">
 					Create an Account
              		</a></li>
+
+			<li class="{{ hasAccount === 'createGroup' ? 'active' : '' }}">
+				<a class="{{  hasAccount === 'createGroup' ? 'active' : '' }}" ng-click="hasAccount = 'createGroup'">
+					Create a Group
+				</a></li>
         </ul>
 
 		<form>
-			<div class="input-group" ng-show="!hasAccount">
+			<div class="input-group" ng-show="hasAccount === false">
 				<input type="text" class="form-control" ng-model="user.name" placeholder="Name">
 				<span class="input-group-addon">Name</span>
+			</div>
+
+			<div class="input-group" ng-show="hasAccount === 'createGroup'">
+				<input type="text" class="form-control" ng-model="user.group" placeholder="Group Name">
+				<span class="input-group-addon">Group Name</span>
 			</div>
 
 			<div class="input-group">
@@ -30,15 +40,6 @@
 			<div class="input-group">
 				<input type="password" class="form-control" ng-model="user.password" placeholder="Password">
 				<span class="input-group-addon">Password</span>
-			</div>
-
-			<div class="input-group" ng-show="!hasAccount">
-				<input type="text" class="form-control" ng-model="user.organisation" placeholder="Org Name">
-				<span class="input-group-addon">Organisation</span>
-			</div>
-
-			<div class="checkbox" ng-show="!hasAccount">
-				<label><input type="checkbox" name="admin" ng-model="user.admin"> Make me admin</label>
 			</div>
 
 			<small ng-bind="error" ng-show="error" class="error"></small>

@@ -35,7 +35,7 @@ class TodoControls {
     createTodo(user) {
     	let todo = _retrieve('single', []);
     	todo.id = 0;
-    	todo.organisation = user.organisation;
+    	todo.group = user.group;
 	    return todo;
 	}
 }
