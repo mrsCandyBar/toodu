@@ -22,19 +22,38 @@ class Home {
 
         $scope.login = function() {
 
-            if ($scope.hasAccount) {
+            if ($scope.hasAccount === true) {
                 Firebase.logIn($rootScope, $scope.user).then(
-                    (response) => { _redirectToDashboard($route, $location);
+                    (response) => {
+                        _redirectToDashboard($route, $location);
                     }, (error) => {
                         $scope.$apply(function () { $scope.error = 'Sorry, login failed. Try again'; });
                     });
 
             } else {
-                Firebase.create($rootScope, $scope.user).then(
-                    (response) => { _redirectToDashboard($route, $location);
-                    }, (error) => {
-                        $scope.$apply(function () { $scope.error = error; });
-                    });
+                console.log('account >>>', $scope.hasAccount);
+                if ($scope.hasAccount === false) {
+                    Firebase.createUser($rootScope, $scope.user).then(
+                        (response) => {
+                            _redirectToDashboard($route, $location);
+                        }, (error) => {
+                            $scope.$apply(function () {
+                                $scope.error = error;
+                            });
+                        });
+                } else {
+                    console.log('account >>> yes', $scope.hasAccount);
+                    Firebase.createGroup($rootScope, $scope.user).then(
+                        (response) => {
+                            $location.path('group');
+                            $route.reload();
+
+                        }, (error) => {
+                            $scope.$apply(function () {
+                                $scope.error = error;
+                            });
+                        });
+                }
             }
         }
 

@@ -51,7 +51,7 @@ angular
                             $scope.task.id = new Date().getTime();
                             $scope.task.createdby.name = $scope.user.name;
                             $scope.task.createdby.id = $scope.user.id;
-                            $scope.task.group = $scope.user.group;
+                            $scope.task.group = $scope.user.group.active.id;
                             $scope.task.location = 'active';
                         }
 

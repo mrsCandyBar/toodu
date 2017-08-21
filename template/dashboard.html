@@ -21,7 +21,7 @@
 							<span>{{ note.date | fromNow }}</span>
 							<span class="btn btn-xs btn-default"
 								  ng-click="removeNote(note)">
-									remove note</span>
+								remove note</span>
 						</note>
 					</div>
 				</li>
@@ -34,13 +34,36 @@
 	<h1 ng-show="user.name">
 		<small>Welcome</small>
 		<span>{{ user.name }}</span>
-		<small>{{ user.email }}</small><br>
 
-		<small ng-if="user.group != user.id">group: {{ user.group }}
-			<a ng-click="switchGroup()" class="btn btn-xs btn-default">personal</a></small>
+		<small>
+			{{ user.email }}<br>
+			{{ user.group.active.id != user.id ? user.group.active.name : 'Personal' }}
 
-		<small ng-if="user.group === user.id">personal
-			<a ng-click="switchGroup()" class="btn btn-xs btn-default">group</a></small>
+			<a  ng-show="user.group.active.id != user.id"
+				ng-click="switchGroup()"
+				class="btn btn-xs btn-default">personal</a>
+
+			<div ng-if="user.group.list" ng-repeat="group in user.group.list">
+				<a ng-click="switchGroup(group)"
+				   class="btn btn-xs btn-default">
+					{{ group.name }}</a>
+
+				<a ng-click="removeGroup(group)"
+				   class="btn btn-xs btn-default">
+					remove
+				</a>
+			</div>
+		</small>
+
+		<div>
+			<h5>Join another group?</h5>
+			<div>
+				<a ng-repeat="group in allGroups"
+				   ng-click="sendMemberRequest(group.id)"
+				   class="btn btn-xs btn-default">
+					{{ group.name }} {{ group.joined === true ? '(joined)' : '' }}</a>
+			</div>
+		</div>
 
 
 		<p ng-model="user.update.name" contenteditable="true"></p>

@@ -32,6 +32,7 @@ class Dashboard {
             $scope.allTasks = Store.allTasks;
             $scope.currentTask = Store.currentTask;
             $scope.taskFilters = Store.taskFilters;
+            $scope.allGroups = Store.allGroups;
             $scope.user = Store.user ? Store.user : {};
 
             if (Store.user) {
@@ -58,24 +59,29 @@ class Dashboard {
             $scope.$on('userDataUpdated', function (event, userData) {
 
                 function replaceAndBackupUserData(data) {
-                    if (data.group != $scope.user.group &&
-                        ($scope.user.group && $scope.user.group.length > 0)) {
+                    if (($scope.user.group && $scope.user.group.length > 0) &&
+                        data.group.active != $scope.user.group.active) {
                         location.reload();
 
                     } else {
                         Firebase.user = data;
                         Firebase.searchFilters = {
                             filter: 'group',
-                            value: data.group
+                            value: data.group.active.id ? data.group.active.id : data.id
                         };
                         $scope.user = Firebase.user;
+                        $scope.user.group.list = _retrieveGroups($scope.user.group.list);
+                        $scope.$broadcast('groupsReturned', $scope.allGroups);
+
+                        Firebase.retrieveGroups($rootScope);
+                        console.log('$scope.user >>>', $scope.user);
                         Store.user = $scope.user;
                     }
                 }
 
                 if (!Firebase.tasks) {
                     replaceAndBackupUserData(userData);
-                    Firebase.retrieveTasks($rootScope);
+                    Firebase.retrieveTasks($rootScope, $scope.user);
 
                     if (activeRoute === 'welcome') {
                         $location.path('dashboard/');
@@ -92,6 +98,35 @@ class Dashboard {
                     }
                 }
             });
+
+            $scope.$on('groupsReturned', function(event, groupsReturned) {
+
+                if ($scope.user.group && $scope.user.group.list) {
+                    Object.keys(groupsReturned).forEach((group) => {
+                        for (let i = 0; i < $scope.user.group.list.length; i++) {
+
+                            console.log('group ids', $scope.user.group.list[i].id, groupsReturned[group].id);
+                            if ($scope.user.group.list[i].id === groupsReturned[group].id) {
+                                groupsReturned[group].joined = true;
+                            }
+                        }
+                    });
+                }
+
+                $scope.allGroups = groupsReturned;
+            });
+
+            $scope.removeGroup = function (group) {
+                let groupData = {
+                    id: $scope.user.id,
+                    name: $scope.user.name,
+                    group: {
+                        name: group.name,
+                        id: group.id
+                    }
+                }
+                Firebase.removeMember(groupData);
+            }
 
             $scope.removeNote = function (note) {
                 Firebase.removeNote(note);
@@ -122,8 +157,6 @@ class Dashboard {
                         Store.otherUsers = $scope.otherUsers;
                         Store.taskFilters = $scope.taskFilters;
                         Store.user = $scope.user;
-
-                        console.log('updateTasks >>> test', $scope.allTasks);
                     });
 
                 } else {
@@ -167,9 +200,8 @@ class Dashboard {
             })
 
             $scope.$on('updateTaskActivity', function(event, data) {
-                console.log('data >>>', data);
                 Firebase.moveTask(data);
-                //$scope.view(data.move.location, data.id);
+                $scope.view(data.move.location, data.id);
             })
 
             $scope.$on('deleteTask', function (event, task) {
@@ -196,20 +228,48 @@ class Dashboard {
                 Firebase.updateUserInfo(user);
             }
 
-            $scope.switchGroup = function() {
-                if (!$scope.user.hideGroup) {
-                    $scope.user.hideGroup = $scope.user.group;
-                    $scope.user.group = $scope.user.id;
-                } else {
-                    $scope.user.group = $scope.user.hideGroup;
+            $scope.switchGroup = function(group) {
+                if (group) {
                     $scope.user.hideGroup = '';
+                    $scope.user.group.active = group;
+                } else {
+                    $scope.user.hideGroup = $scope.user.group.active;
+                    $scope.user.group.active.id = $scope.user.id;
+
                 }
 
                 Firebase.updateUserGroup($scope.user);
                 location.reload();
+            }
+
+            $scope.sendMemberRequest = function(groupId) {
+                let memberRequest = {
+                    id: $scope.user.id,
+                    name: $scope.user.name,
+                    email: $scope.user.email,
+                    group: {
+                        id: groupId
+                    }
+                }
+                Firebase.sendMemberRequest(memberRequest);
             }
         }
 	}
 }
 
 module.exports = Dashboard;
+
+function _retrieveGroups(rawObj) {
+    if (rawObj && rawObj !== null && typeof rawObj === 'object') {
+        let buildMap = [];
+
+        Object.keys(rawObj).forEach((todoObj) => {
+            let currentTodo = rawObj[todoObj];
+            buildMap[buildMap.length] = currentTodo;
+        });
+
+        return buildMap;
+
+    } else {
+        return []; }
+}

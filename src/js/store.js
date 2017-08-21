@@ -4,6 +4,7 @@ class Store {
         this.allTasks = {};
         this.currentTask = {};
         this.taskFilters = {};
+        this.allGroups = {};
         this.user;
     }
 }

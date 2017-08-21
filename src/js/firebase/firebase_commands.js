@@ -6,32 +6,80 @@ class Command {
 			id: userId,
 			name: userData.name,
 			email: userData.email,
-			password: userData.password
+			password: userData.password,
+			group: {
+				active: {
+					id: userId
+				},
+			}
 		});
 	}
 
     addGroup(database, groupId, groupData) {
-        database.ref('users/' + groupId).set({
+        database.ref('groups/' + groupId).set({
             id: groupId,
             name: groupData.name,
             email: groupData.email,
-            password: groupData.password
+            password: groupData.password,
+            group: {
+                active: {
+                    id: groupId
+                },
+            },
         });
     }
 
     updateUser(database, userData) {
 		database.ref('users/' + userData.id).update({
 			name: userData.update.name ? userData.update.name : userData.name,
-			group: userData.update.group ? userData.update.group : userData.group,
 			email: userData.update.email ? userData.update.email : userData.email
 		});
 	}
 
     updateUserGroup(database, userData) {
-        database.ref('users/' + userData.id).update({
-            group: userData.group ? userData.group : userData.group,
-            hideGroup: userData.hideGroup ? userData.hideGroup : ''
+        database.ref('users/' + userData.id + '/group').update({
+            active: {
+                id: userData.group.active.id,
+                name: userData.group.active.name
+            },
+			hideGroup: userData.hideGroup ? userData.hideGroup : ''
         });
+    }
+
+    sendMemberRequest(database, memberRequest) {
+        database.ref('groups/' + memberRequest.group.id + '/members/requests/' + memberRequest.id).update({
+			name: memberRequest.name,
+			email: memberRequest.email,
+			id: memberRequest.id
+		});
+    }
+
+    memberRequest(database, groupData) {
+        if (groupData.status === 'remove') {
+            database.ref('groups/' + groupData.id + '/members/active/' + groupData.member.id).remove();
+            database.ref('users/' + groupData.member.id + '/group/list/' + groupData.id).remove();
+
+        } else {
+            if (groupData.status === 'accept') {
+                database.ref('groups/' + groupData.id + '/members/active/' + groupData.member.id).update({
+                    name: groupData.member.name,
+                    email: groupData.member.email,
+                    id: groupData.member.id
+                });
+
+                database.ref('users/' + groupData.member.id + '/group/list/' + groupData.id).update({
+                    name: groupData.name,
+                    id: groupData.id
+                });
+            }
+            database.ref('groups/' + groupData.id + '/members/requests/' + groupData.member.id).remove();
+        }
+        this.sendUserNotification(database, groupData.notify);
+	}
+
+    removeMember(database, memberData) {
+        database.ref('groups/' + memberData.group.id + '/members/active/' + memberData.id).remove();
+        database.ref('users/' + memberData.id + '/group/list/' + memberData.group.id).remove();
     }
 
 	removeUser(database, userId) {
@@ -39,7 +87,6 @@ class Command {
 	}
 
 	updateTask(database, taskData) {
-		console.log('updates >>>', database, taskData)
 		database.ref('tasks/' + taskData.group + '/' + taskData.location + '/' + taskData.id).update({
 			id: taskData.id,
 			createdby: taskData.createdby,
@@ -124,7 +171,6 @@ class Command {
     }
 
     addReplyAndNotifyCommenter(database, replyData) {
-		console.log('replyData >>', replyData);
 		this.addCommentToTask(database, replyData);
         this.sendUserNotification(database, replyData);
 	}

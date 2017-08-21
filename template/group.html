@@ -1,0 +1,68 @@
+<article class="contentHolder" ng-if="userIsSignedIn">
+
+    {{ user.name }}
+    <p>{{ user.description }}</p>
+    <p>{{ user.email }}</p>
+
+    <!-- Users -->
+    <section>
+        <h3>Members</h3>
+        <ul>
+            <li ng-repeat="member in user.members.active">{{ member.name }} (<i>{{ member.email }}</i>) <a ng-click="memberRequest('remove', member)">remove</a></li>
+        </ul>
+
+        <h5>Pending</h5>
+        <ul>
+            <li ng-repeat="member in user.members.requests">{{ member.name }} (<i>{{ member.email }}</i>)
+                <a ng-click="memberRequest('accept', member)">accept</a> | <a ng-click="memberRequest('decline', member)">decline</a></li>
+        </ul>
+    </section>
+
+    <br><br>
+    <!-- Tasks -->
+    <section class="contentHolder__btn-holder"><!-- ng-show="allTasks && allTasks.length > 0"-->
+        Active
+        <ul class="taskList">
+            <li ng-repeat="thisTask in tasks.active" class="taskList__holder" ng-click="view('active', thisTask.id)">
+                <a 	class="taskList__holder--title status__{{ thisTask.status}} urgency__{{ thisTask.urgency }}">
+                    {{ thisTask.title }}
+                </a><br>
+                <div class="taskList__holder--user status__{{ thisTask.status }} urgency__{{ thisTask.urgency }}">
+                    {{ thisTask.username }}
+                    (<i>{{ thisTask.status }}</i>) </div>
+            </li>
+        </ul>
+
+        Hold
+        <ul class="taskList">
+            <li ng-repeat="thisTask in tasks.hold" class="taskList__holder" ng-click="view('hold', thisTask.id)">
+                <a 	class="taskList__holder--title status__{{ thisTask.status}} urgency__{{ thisTask.urgency }}">
+                    {{ thisTask.title }}
+                </a><br>
+                <div class="taskList__holder--user status__{{ thisTask.status }} urgency__{{ thisTask.urgency }}">
+                    {{ thisTask.username }}
+                    (<i>{{ thisTask.status }}</i>) </div>
+            </li>
+        </ul>
+
+        Complete
+        <ul class="taskList">
+            <li ng-repeat="thisTask in tasks.complete" class="taskList__holder" ng-click="view('complete', thisTask.id)">
+                <a 	class="taskList__holder--title status__{{ thisTask.status}} urgency__{{ thisTask.urgency }}">
+                    {{ thisTask.title }}
+                </a><br>
+                <div class="taskList__holder--user status__{{ thisTask.status }} urgency__{{ thisTask.urgency }}">
+                    {{ thisTask.username }}
+                    (<i>{{ thisTask.status }}</i>) </div>
+            </li>
+        </ul>
+    </section>
+
+    <!-- Group Chat -->
+
+
+</article>
+
+<article ng-if="!userIsSignedIn">
+    <h1>Goodbye, <br>see you soon :)</h1>
+</article>

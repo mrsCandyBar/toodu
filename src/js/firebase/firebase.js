@@ -8,7 +8,6 @@ class Firebase {
 	constructor() {
         window.sessionStorage.userID        ? this.userID = window.sessionStorage.userID                            : this.userID;window.sessionStorage.user          ? this.user = JSON.parse(window.sessionStorage.user)                    : this.user;
         window.sessionStorage.tasks         ? this.tasks = JSON.parse(window.sessionStorage.tasks)                  : this.tasks;
-        window.sessionStorage.searchFilters ? this.searchFilters = JSON.parse(window.sessionStorage.searchFilters)  : this.searchFilters;
         this.allUsers;
         this.firebase = initDB();
         this.database = this.firebase.database()
@@ -28,7 +27,7 @@ class Firebase {
     }
 
     // Create a new user
-    create($rootScope, userData) {
+    createUser($rootScope, userData) {
         let createUser = new Promise((resolve, reject) => {
             User.create(userData).then((data) => {
                 Command.addUser(this.database, data.uid, userData);
@@ -47,6 +46,28 @@ class Firebase {
         });
 
         return createUser;
+    }
+
+    // Create a new group
+    createGroup($rootScope, userData) {
+        let newGroup = new Promise((resolve, reject) => {
+            User.create(userData).then((data) => {
+                Command.addGroup(this.database, data.uid, userData);
+
+                this.logIn($rootScope, userData).then((response) => {
+                    resolve(response);
+                }, (error) => {
+                    console.log('user created but signIn failed >>', error);
+                    reject(error);
+                });
+
+            }, (error) => {
+                reject(error.message);
+            });
+
+        });
+
+        return newGroup;
     }
 
     // Log user in
@@ -109,16 +130,58 @@ class Firebase {
         Command.updateUserGroup(this.database, userData);
     }
 
-    // retrieve tasks
-    retrieveTasks($rootScope) {
-        console.log('start task retrieval', this.searchFilters.value);
+    // Get group info
+    retrieveGroupInfo($rootScope) {
+        console.log('returns >>>', this.userID);
         this.database
-            .ref('/tasks/' + this.searchFilters.value)
+            .ref('/groups/' + this.userID)
+            .on('value', function(snapshot) {
+                let userData = snapshot.val() ? snapshot.val() : [];
+                console.log('returns >>>', snapshot);
+                $rootScope.$broadcast('groupDataUpdated', userData);
+
+            }, function(err) {
+                console.log('denied >>>', err);
+            });
+    }
+
+    // Update group info
+    updateGroupInfo(userData) {
+        Command.updateUser(this.database, userData);
+    }
+
+    // Member Request
+    sendMemberRequest(memberRequest) {
+        Command.sendMemberRequest(this.database, memberRequest);
+    }
+
+    removeMember(memberData) {
+	    Command.removeMember(this.database, memberData);
+    }
+
+    memberRequest(groupData) {
+	    Command.memberRequest(this.database, groupData);
+    }
+
+    // retrieve tasks
+    retrieveTasks($rootScope, user) {
+        this.database
+            .ref('/tasks/' + user.group.active.id)
             .on('value', function(snapshot) {
             let updates = snapshot.val() ? snapshot.val() : [];
             $rootScope.$broadcast('userTasksUpdated', updates);
 
         }, function(err) { console.log('denied >>>', err); });
+    }
+
+    retrieveGroups($rootScope) {
+        this.database
+            .ref('/groups/')
+            .once('value', function(snapshot) {
+                let updates = snapshot.val() ? snapshot.val() : [];
+                $rootScope.$broadcast('groupsReturned', updates);
+
+            }, function(err) { console.log('denied >>>', err); });
     }
 
     // update task
