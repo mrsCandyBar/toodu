@@ -3,7 +3,7 @@ import TodoModel from '../todo/todo_model.js';
 
 class Dashboard {
 
-	init(Firebase, $rootScope, $scope, $route, $location, activity, Store) {
+	init(Firebase, $rootScope, $scope, $route, $location, Store) {
 
         $scope.userIsSignedIn = window.sessionStorage.password && window.sessionStorage.email ? true : false;
 
@@ -15,6 +15,7 @@ class Dashboard {
 
         } else {
 
+            // SETUP DATA
             function _currentRoute() {
                 let route = 'dashboard';
                 if ($route.current.params.id) {
@@ -29,38 +30,26 @@ class Dashboard {
                 return route;
             }
             let activeRoute = _currentRoute();
-            $scope.allFilters = Store.allFilters;
-            $scope.allTasks = Store.allTasks;
-            $scope.currentTask = Store.currentTask;
-            $scope.taskFilters = Store.taskFilters;
-            $scope.allGroups = Store.allGroups;
-            $scope.user = Store.user ? Store.user : {};
+            Object.keys(Store).forEach((obj) => {
+                $scope[obj] = Store[obj];
+            });
 
+            // Determine if user has logged in/not
             if (Store.user) {
-                // Runs after init page load when navigating to other pages
-                if (activeRoute && activeRoute.location) {
-                    $scope.currentTask = TodoControls.retrieveSingleTodo(activeRoute, $scope.allTasks);
-                    $scope.currentTask.editable = false;
-                    Store.currentTask = $scope.currentTask;
-
-                } else {
-                    $scope.currentTask = TodoControls.createTodo($scope.user);
-                    console.log('currentTask >>>', $scope.currentTask);
-                }
+                _recoverCurrentTask();
             }
-
-            // Listen for user to log in
-            if (!Store.user) {
+            else {
+                Firebase.listenForEvents($rootScope);
+                $scope.user = {};
                 if (activeRoute === 'welcome') {
-                    Firebase.retrieveUserInfo($rootScope);
-
-                } else {
+                    Firebase.retrieveUserInfo($rootScope); }
+                else {
                     $scope.$on('userLoggedIn', function (event) {
                         Firebase.retrieveUserInfo($rootScope);
-                    });
-                }
+                    }); }
             }
 
+            // UPDATE USER DATA
             $scope.$on('userDataUpdated', function (event, userData) {
 
                 function replaceAndBackupUserData(data) {
@@ -85,7 +74,6 @@ class Dashboard {
                         Store.user = $scope.user;
                     }
                 }
-
                 if (!Firebase.tasks) {
                     replaceAndBackupUserData(userData);
                     Firebase.retrieveTasks($rootScope, $scope.user);
@@ -105,40 +93,26 @@ class Dashboard {
                     }
                 }
             });
-
-            $scope.$on('groupsReturned', function(event, groupsReturned) {
-                if ($scope.user.group && $scope.user.group.list) {
-                    Object.keys(groupsReturned).forEach((group) => {
-                        for (let i = 0; i < $scope.user.group.list.length; i++) {
-
-                            if ($scope.user.group.list[i].id === groupsReturned[group].id) {
-                                groupsReturned[group].joined = true;
-                            }
-                        }
-                    });
-                }
-
-                $scope.allGroups = groupsReturned;
-            });
-
-            $scope.removeGroup = function (group) {
-                let groupData = {
-                    id: $scope.user.id,
-                    name: $scope.user.name,
-                    group: {
-                        name: group.name,
-                        id: group.id
-                    }
-                }
-                Firebase.removeMember(groupData);
+            $scope.updateUserDetails = function(user) {
+                Firebase.updateUserInfo(user);
             }
-
             $scope.removeNote = function (note) {
                 Firebase.removeNote(note);
             }
+            $scope.logout = function () {
+                Firebase.logOut().then(() => {
+                    location.reload();
+                });
+            }
 
-
-            // Listen for tasks retrieved
+            // USER TASKS
+            $scope.$on('newTaskData', function (event, data) {
+                Store.currentTask = data;
+                if (activeRoute === 'create') {
+                    $scope.view($scope.currentTask.location, $scope.currentTask.id);
+                }
+                Firebase.updateTask(data);
+            });
             $scope.$on('userTasksUpdated', function (event, data) {
 
                 function _returnTasks(data) {
@@ -163,10 +137,6 @@ class Dashboard {
                         Store.otherUsers = $scope.otherUsers;
                         Store.taskFilters = $scope.taskFilters;
                         Store.user = $scope.user;
-
-                        if (activeRoute.location === 'create') {
-                            console.log('TEST!');
-                        }
                     });
 
                 } else {
@@ -174,12 +144,14 @@ class Dashboard {
                     function updateDOM() {
                         let returnTask = _returnTasks(data);
                         $scope.allTasks = _retrieveTodos(data);
-                        if (activeRoute === 'create') {
-                            console.log('create')
-                            $scope.currentTask = TodoControls.createTodo($scope.user);
-                        }
                         Store.allTasks = $scope.allTasks;
-                        Store.currentTask = $scope.currentTask;
+
+                        if (activeRoute === 'create') {
+                            $scope.currentTask = TodoControls.createTodo($scope.user);
+                            Store.currentTask = $scope.currentTask;
+                        } else {
+                            _recoverCurrentTask();
+                        }
                     }
 
                     if (!$scope.$$phase) {
@@ -194,55 +166,51 @@ class Dashboard {
                 }
             });
 
-            $scope.$on('newTaskData', function (event, data) {
-                Store.currentTask = data;
-                if (activeRoute === 'create') {
-                    $scope.view($scope.currentTask.location, $scope.currentTask.id);
-                }
-                Firebase.updateTask(data);
-            });
-
-            $scope.$on('updateMyTasks', function (event, data) {
-                Firebase.updateMyTasks(data, $scope.user.id);
-            });
-
-            $scope.$on('updateTaskLocationChange', function (event, data) {
-                Firebase.updateTaskHoldersOfLocationChange(data);
-            })
-
+            // CURRENT TASK UPDATES
             $scope.$on('updateTaskActivity', function(event, data) {
                 Firebase.moveTask(data);
                 $scope.view(data.move.location, data.id);
             })
-
             $scope.$on('deleteTask', function (event, task) {
                 Firebase.deleteTask(task, 'active');
                 $scope.view('');
             });
 
-            $scope.$on('notifyTaskHolders', function (event, commentData)   { Firebase.sendUserNotification(commentData); });
-            $scope.$on('addComment', function (event, commentData)          { Firebase.addComment(commentData); });
-            $scope.$on('addReply', function (event, replyData)              { Firebase.addReplyAndNotifyCommenter(replyData); });
-
+            // REROUTE
             $scope.view = function (location, taskId) {
                 let reRouteToPath = '' + location + '/' + taskId;
                 $location.path('task/' + reRouteToPath);
             }
 
-            $scope.logout = function () {
-                Firebase.logOut().then(() => {
-                    location.reload();
-                });
-            }
+            // GROUP
+            $scope.$on('groupsReturned', function(event, groupsReturned) {
+                if ($scope.user.group && $scope.user.group.list) {
+                    Object.keys(groupsReturned).forEach((group) => {
+                        for (let i = 0; i < $scope.user.group.list.length; i++) {
 
-            $scope.updateUserDetails = function(user) {
-                Firebase.updateUserInfo(user);
-            }
+                            if ($scope.user.group.list[i].id === groupsReturned[group].id) {
+                                groupsReturned[group].joined = true;
+                            }
+                        }
+                    });
+                }
 
+                $scope.allGroups = groupsReturned;
+            });
             $scope.findGroup = function(email) {
                 Firebase.retrieveGroups($rootScope, email);
             }
-
+            $scope.sendMemberRequest = function(groupId) {
+                let memberRequest = {
+                    id: $scope.user.id,
+                    name: $scope.user.name,
+                    email: $scope.user.email,
+                    group: {
+                        id: groupId
+                    }
+                }
+                Firebase.sendMemberRequest(memberRequest);
+            }
             $scope.switchGroup = function(group) {
                 if (group) {
                     $scope.user.hideGroup = '';
@@ -256,17 +224,21 @@ class Dashboard {
                 Firebase.updateUserGroup($scope.user);
                 location.reload();
             }
-
-            $scope.sendMemberRequest = function(groupId) {
-                let memberRequest = {
+            $scope.removeGroup = function (group) {
+                let groupData = {
                     id: $scope.user.id,
                     name: $scope.user.name,
-                    email: $scope.user.email,
                     group: {
-                        id: groupId
+                        name: group.name,
+                        id: group.id
                     }
                 }
-                Firebase.sendMemberRequest(memberRequest);
+                Firebase.removeMember(groupData);
+            }
+
+            function _recoverCurrentTask() {
+                $scope.currentTask = activeRoute.location ? TodoControls.retrieveSingleTodo(activeRoute, $scope.allTasks) : TodoControls.createTodo($scope.user);
+                Store.currentTask = $scope.currentTask;
             }
         }
 	}
@@ -288,7 +260,6 @@ function _retrieveGroups(rawObj) {
     } else {
         return []; }
 }
-
 function _retrieveTodos(rawObj) {
     if (rawObj && rawObj !== null && typeof rawObj === 'object') {
         let buildMap = [];

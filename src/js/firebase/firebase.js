@@ -4,26 +4,30 @@ import User from './firebase_user.js';
 import Command from './firebase_commands.js';
 
 class Firebase {
-	
-	constructor() {
-        window.sessionStorage.userID        ? this.userID = window.sessionStorage.userID                            : this.userID;window.sessionStorage.user          ? this.user = JSON.parse(window.sessionStorage.user)                    : this.user;
-        window.sessionStorage.tasks         ? this.tasks = JSON.parse(window.sessionStorage.tasks)                  : this.tasks;
+
+    constructor() {
+        window.sessionStorage.userID ? this.userID = window.sessionStorage.userID : this.userID;
+        window.sessionStorage.user ? this.user = JSON.parse(window.sessionStorage.user) : this.user;
+        window.sessionStorage.tasks ? this.tasks = JSON.parse(window.sessionStorage.tasks) : this.tasks;
         this.allUsers;
         this.firebase = initDB();
         this.database = this.firebase.database()
         this.auth = this.firebase.auth();
         this.user;
-	}
+    }
 
-	// If user has not logged out and is still in the same tab
+    // If user has not logged out and is still in the same tab
     autoLogin($rootScope, $route) {
         let user = {
-          email : window.sessionStorage.email,
-          password : window.sessionStorage.password
+            email: window.sessionStorage.email,
+            password: window.sessionStorage.password
         }
 
-        this.logIn($rootScope, user).then((response) => {},
-            (error) => { console.log('auto login failed >>>', error) });
+        this.logIn($rootScope, user).then((response) => {
+            },
+            (error) => {
+                console.log('auto login failed >>>', error)
+            });
     }
 
     // Create a new user
@@ -88,9 +92,9 @@ class Firebase {
         });
 
         return logInUser;
-	}
+    }
 
-	// Log user out
+    // Log user out
     logOut() {
         let logOutUser = new Promise((resolve, reject) => {
             Authorize.signOut(this.auth).then((data) => {
@@ -109,21 +113,21 @@ class Firebase {
 
     // Get user info
     retrieveUserInfo($rootScope) {
-	    console.log('UserID',this.userID)
+        console.log('UserID', this.userID)
         this.database
             .ref('/users/' + this.userID)
-            .on('value', function(snapshot) {
+            .on('value', function (snapshot) {
                 let userData = snapshot.val() ? snapshot.val() : [];
                 $rootScope.$broadcast('userDataUpdated', userData);
 
-            }, function(err) {
+            }, function (err) {
                 console.log('denied >>>', err);
             });
     }
 
     // Update user info
     updateUserInfo(userData) {
-	    Command.updateUser(this.database, userData);
+        Command.updateUser(this.database, userData);
     }
 
     // Update user group
@@ -136,12 +140,12 @@ class Firebase {
         console.log('returns >>>', this.userID);
         this.database
             .ref('/groups/' + this.userID)
-            .on('value', function(snapshot) {
+            .on('value', function (snapshot) {
                 let userData = snapshot.val() ? snapshot.val() : [];
                 console.log('returns >>>', snapshot);
                 $rootScope.$broadcast('groupDataUpdated', userData);
 
-            }, function(err) {
+            }, function (err) {
                 console.log('denied >>>', err);
             });
     }
@@ -157,23 +161,24 @@ class Firebase {
     }
 
     removeMember(memberData) {
-	    Command.removeMember(this.database, memberData);
+        Command.removeMember(this.database, memberData);
     }
 
     memberRequest(groupData) {
-	    Command.memberRequest(this.database, groupData);
+        Command.memberRequest(this.database, groupData);
     }
 
     // retrieve tasks
     retrieveTasks($rootScope, user) {
-        console.log('user >>>', user);
         this.database
             .ref('/tasks/' + user.group.active.id)
-            .on('value', function(snapshot) {
-            let updates = snapshot.val() ? snapshot.val() : [];
-            $rootScope.$broadcast('userTasksUpdated', updates);
+            .on('value', function (snapshot) {
+                let updates = snapshot.val() ? snapshot.val() : [];
+                $rootScope.$broadcast('userTasksUpdated', updates);
 
-        }, function(err) { console.log('denied >>>', err); });
+            }, function (err) {
+                console.log('denied >>>', err);
+            });
     }
 
     retrieveGroups($rootScope, email) {
@@ -181,33 +186,46 @@ class Firebase {
             .ref('/groups/')
             .orderByChild('email')
             .equalTo(email)
-            .once('value', function(snapshot) {
+            .once('value', function (snapshot) {
                 let updates = snapshot.val() ? snapshot.val() : [];
                 $rootScope.$broadcast('groupsReturned', updates);
 
-            }, function(err) { console.log('denied >>>', err); });
+            }, function (err) {
+                console.log('denied >>>', err);
+            });
     }
 
     // update task
-    updateTask(taskData)                        { Command.updateTask(this.database, taskData); }
-    updateMyTasks(watchTasks, userId)           { Command.updateMyTasks(this.database, watchTasks, userId); }
-    deleteTask(taskData)                        { Command.deleteTask(this.database, taskData); }
+    updateTask(taskData) {
+        Command.updateTask(this.database, taskData);
+    }
+
+    deleteTask(taskData) {
+        Command.deleteTask(this.database, taskData);
+    }
 
     moveTask(taskData) {
         Command.moveTask(this.database, taskData);
         Command.sendUserNotification(this.database, taskData.updateContributers);
     }
-    updateTaskHoldersOfLocationChange(taskData) {
-        Command.updateTaskHoldersOfLocationChange(this.database, taskData);
+
+    removeNote(note) {
+        Command.removeSingleUserNote(this.database, note)
     }
 
+    listenForEvents($rootScope) {
+        let database = this.database;
 
-    // Comments
-    sendUserNotification(commentData)           { Command.sendUserNotification(this.database, commentData); }
-    removeNote(note)                            { Command.removeSingleUserNote(this.database, note) }
-    addComment(commentData)                     { Command.addReplyAndNotifyCommenter(this.database, commentData); }
-    addReplyAndNotifyCommenter(replyData)       { Command.addReplyAndNotifyCommenter(this.database, replyData); }
-  }
+        // Task Updates
+        $rootScope.$on('updateMyTasks', function (event, watchTasks)        { Command.updateMyTasks(database, watchTasks, this.userId); });
+        $rootScope.$on('updateTaskLocationChange', function (event, taskData) { Command.updateTaskHoldersOfLocationChange(database, taskData); })
+
+        // Comments
+        $rootScope.$on('notifyTaskHolders', function (event, commentData)   { Command.sendUserNotification(database, commentData); });
+        $rootScope.$on('addComment', function (event, commentData)          { Command.addReplyAndNotifyCommenter(database, commentData); });
+        $rootScope.$on('addReply', function (event, replyData)              { Command.addReplyAndNotifyCommenter(database, replyData); });
+    }
+}
 
   function initDB() {
       var config = {

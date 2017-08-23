@@ -12,13 +12,6 @@ angular
 
             controller: function($scope) {
 
-                    $scope.comment = {
-                        name: $scope.user && $scope.user.name ? $scope.user.name : '',
-                        from: $scope.user && $scope.user.id ? $scope.user.id : '',
-                        message: '',
-                        id: 0
-                    }
-
                     // Toggle Task Edit Mode
                     $scope.$watch('task.editable', function () {
                         if ($scope.task && $scope.task.editable) {
@@ -37,15 +30,7 @@ angular
                         }
                     });
 
-                    $scope.cancel = function () {
-                        $scope.task = JSON.parse($scope.backup);
-                        if ($scope.task && ($scope.task.id != 0)) {
-                            $scope.task.editable = false;
-                        }
-                    }
-
-
-                    // Update Tasks
+                    // Create/Update/Cancel Update Tasks
                     $scope.submit = function () {
                         if ($scope.task.id === 0) {
                             $scope.task.id = new Date().getTime();
@@ -61,6 +46,12 @@ angular
 
                         $scope.$emit('newTaskData', newTask);
                     }
+                    $scope.cancel = function () {
+                    $scope.task = JSON.parse($scope.backup);
+                    if ($scope.task && ($scope.task.id != 0)) {
+                        $scope.task.editable = false;
+                    }
+                }
 
                     // Accept/Return Task
                     $scope.accept = function (status) {
@@ -111,23 +102,7 @@ angular
                         $scope.$emit('notifyTaskHolders', commentData);
                     }
 
-
-                    // Comments
-                    $scope.addComment = function (userComment) {
-                        let commentData = _buildComment(userComment.message);
-                            commentData.for = _listMembers();
-                        $scope.$emit('addComment', commentData);
-                    }
-
-                    // Reply to Comments
-                    $scope.replyToComment = function (replyData, commentData) {
-                        let replyToComment = _buildComment(replyData.message);
-                            replyToComment.origin = commentData.id;
-                            replyToComment.for = _listMembers('AllUsersInThread', commentData.reply);
-                        $scope.$emit('addReply', replyToComment);
-                    }
-
-
+                    // Delete/Move Task Location
                     $scope.deleteTodo = function () {
                         // Delete Task
                         let thisTask = {
@@ -138,7 +113,6 @@ angular
 
                         $scope.$emit('deleteTask', thisTask);
                     }
-
                     $scope.moveTodo = function (moveStatus) {
                         // Move Task
                         $scope.task.move = {
@@ -173,6 +147,28 @@ angular
                         $scope.$emit('updateTaskLocationChange', taskUpdate);
                     }
 
+                    // Comments
+                    $scope.comment = {
+                    name: $scope.user && $scope.user.name ? $scope.user.name : '',
+                    from: $scope.user && $scope.user.id ? $scope.user.id : '',
+                    message: '',
+                    id: 0
+                }
+                    $scope.addComment = function (userComment) {
+                        let commentData = _buildComment(userComment.message);
+                        commentData.for = _listMembers();
+                        $scope.$emit('addComment', commentData);
+                    }
+                    $scope.showReply = function(commentVisibility) {
+                        commentVisibility.visible = commentVisibility.visible ? false: true;
+                    }
+                    $scope.replyToComment = function (replyData, commentData) {
+                        let replyToComment = _buildComment(replyData.message);
+                        replyToComment.origin = commentData.id;
+                        replyToComment.for = _listMembers('AllUsersInThread', commentData.reply);
+                        $scope.$emit('addReply', replyToComment);
+                    }
+
 
                 function _buildComment(messageData) {
                     let comment = {
@@ -190,7 +186,6 @@ angular
 
                     return comment;
                 }
-
                 function _listMembers(condition, commentId) {
                     let state = [
                         'AllUsersInTask',
@@ -253,11 +248,6 @@ angular
 
                     return UserMembers;
 
-                }
-
-                $scope.showReply = function(commentVisibility) {
-                    console.log('comment >>>', commentVisibility);
-                    commentVisibility.visible = commentVisibility.visible ? false: true;
                 }
 
             },

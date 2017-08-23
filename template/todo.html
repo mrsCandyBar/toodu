@@ -9,14 +9,14 @@
 
         <!-- Task State : Hold | Complete | Delete -->
         <article ng-show="!task.editable">
-          <ul class="pagination">
-            <li><a  ng-show="!task.editable && task.status != 'Done' && task.createdby.id === user.id" ng-click="moveTodo('hold')">
+          <ul class="pagination" ng-if="task.createdby.id === user.id">
+            <li><a  ng-show="task.status != 'Done'" ng-click="moveTodo('hold')">
               {{ (task.isActive === true) ? 'Task On Hold' : 'Activate Task' }}</a></li>
 
-            <li><a  ng-show="!task.editable && task.status === 'Done' && task.createdby.id === user.id" ng-click="moveTodo('complete')">
+            <li><a  ng-show="task.status === 'Done'" ng-click="moveTodo('complete')">
                       {{ (task.isActive === true) ? 'Completed' : 'Reactivate' }}</a></li>
 
-            <li><a  ng-show="!task.editable && task.createdby.id === user.id" ng-click="deleteTodo()">
+            <li><a  ng-click="deleteTodo()">
                       Delete</a></li>
           </ul>
 

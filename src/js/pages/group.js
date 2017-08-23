@@ -2,7 +2,7 @@ import TodoModel from '../todo/todo_model.js';
 
 class Group {
 
-    init(Firebase, $rootScope, $scope, $route, $location, activity, Store) {
+    init(Firebase, $rootScope, $scope, $route, $location) {
 
         $scope.userIsSignedIn = window.sessionStorage.password && window.sessionStorage.email ? true : false;
 
@@ -38,6 +38,11 @@ class Group {
                         }
                     }
                 });
+                $scope.logout = function () {
+                    Firebase.logOut().then(() => {
+                        location.reload();
+                    });
+                }
 
                 // Listen for task updates
                 $scope.$on('userTasksUpdated', function (event, data) {
@@ -66,7 +71,6 @@ class Group {
                         }
                     }
                 });
-
                 $scope.memberRequest = function(request, member) {
                     let messageText = {
                         accept: "Welcome to " + $scope.user.name,
@@ -95,12 +99,6 @@ class Group {
                     }
 
                     Firebase.memberRequest(groupData);
-                }
-
-                $scope.logout = function () {
-                    Firebase.logOut().then(() => {
-                        location.reload();
-                    });
                 }
 
             });

@@ -49,7 +49,7 @@ var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'editIn
           Firebase.autoLogin($rootScope, $route);
       }
 
-      new Dashboard().init(Firebase, $rootScope, $scope, $route, $location, 'tasks', Store);
+      new Dashboard().init(Firebase, $rootScope, $scope, $route, $location, Store);
   });
 
   todoApp.controller('groupControls', function($scope, $route, $location, $rootScope){
@@ -58,5 +58,5 @@ var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'editIn
             Firebase.autoLogin($rootScope, $route);
         }
 
-        new Group().init(Firebase, $rootScope, $scope, $route, $location, 'tasks', Store);
+        new Group().init(Firebase, $rootScope, $scope, $route, $location);
   });

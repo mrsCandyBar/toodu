@@ -29,7 +29,6 @@ class TodoControls {
 	retrieveTodoStates() { return _retrieve('state'); }
 
     retrieveSingleTodo(taskData, allTasks) {
-		console.log('run', taskData, allTasks);
         let task = findTask(allTasks, taskData);
         task = _retrieve('single', task);
         return task;
@@ -62,6 +61,7 @@ function findTask(allTasks, taskData) {
 		for (let i = 0; i < taskState.length; i++) {
 			if (taskState[i]['id'] == taskData.id) {
                 taskState = taskState[i];
+                taskState.editable = false;
 			}
 		}
 	} else {
