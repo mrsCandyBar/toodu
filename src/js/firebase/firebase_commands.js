@@ -11,13 +11,17 @@ class Command {
 				active: {
 					id: userId
 				},
-			}
+			},
+            description: 'Your description goes here, hit the edit button beside your name to edit your details.',
+
 		});
 	}
 
     addGroup(database, groupId, groupData) {
         database.ref('groups/' + groupId).set({
             id: groupId,
+            description: 'click to select and edit all purple text. \n' +
+                            'A description of your group should go here',
             name: groupData.name,
             email: groupData.email,
             password: groupData.password,
@@ -32,7 +36,8 @@ class Command {
     updateUser(database, userData) {
 		database.ref('users/' + userData.id).update({
 			name: userData.update.name ? userData.update.name : userData.name,
-			email: userData.update.email ? userData.update.email : userData.email
+			email: userData.update.email ? userData.update.email : userData.email,
+            description: userData.update.description ? userData.update.description : userData.description
 		});
 	}
 

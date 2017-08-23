@@ -109,6 +109,7 @@ class Firebase {
 
     // Get user info
     retrieveUserInfo($rootScope) {
+	    console.log('UserID',this.userID)
         this.database
             .ref('/users/' + this.userID)
             .on('value', function(snapshot) {
@@ -165,6 +166,7 @@ class Firebase {
 
     // retrieve tasks
     retrieveTasks($rootScope, user) {
+        console.log('user >>>', user);
         this.database
             .ref('/tasks/' + user.group.active.id)
             .on('value', function(snapshot) {
@@ -174,9 +176,11 @@ class Firebase {
         }, function(err) { console.log('denied >>>', err); });
     }
 
-    retrieveGroups($rootScope) {
+    retrieveGroups($rootScope, email) {
         this.database
             .ref('/groups/')
+            .orderByChild('email')
+            .equalTo(email)
             .once('value', function(snapshot) {
                 let updates = snapshot.val() ? snapshot.val() : [];
                 $rootScope.$broadcast('groupsReturned', updates);

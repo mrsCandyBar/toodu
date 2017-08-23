@@ -6,11 +6,27 @@
 .mobileOnly { display: none; }
 
 /* ------ /Reset ------ */
+$grey: #111111;
+$purple: #9F00F6;
+$pink: #FF0088;
+$lavender: #A02DFF;
+$white: #FFFFFF;
 
 body { 
 	display: table;
 	width: 100%;
-	background: #d1d2d4;
+	background: $grey;
+
+	h1, h2, h3, h4, h5, h6 {
+		line-height: 1.4em;
+		* { color: inherit; line-height: inherit; }
+	}
+
+	* { color: $white; }
+	h1 { color: $pink; line-height: 1.2em; }
+	h3, h4, h5, h6 { color: $purple; }
+	h5, h6 { color: $lavender; }
+	p.edit { color: $lavender; }
 
 	nav { 
 		position: absolute;
@@ -48,6 +64,10 @@ body {
 	margin: 0 5%;
 	width: 90%;
 
+	section {
+		margin: 3em 0px;
+	}
+
 	form { 
 		margin: 30px 0px 0px;
 
@@ -78,55 +98,4 @@ body {
 	form {
 		max-width: 350px;
 	}
-}
-
-.error { 
-	background: rgba(40,100,40,0.5);
-	color: white;
-	padding: 5px 10px;
-	margin-bottom: 20px;
-	border-radius: 5px;
-	display: inline-block;
-}
-
-
-h1 {
-	font-size: 60px;
-	padding-bottom: 60px;
-	position: relative;
-	letter-spacing: 0.1em;
-
-	span { 
-		padding-left: 20px; 
-		line-height: 1em;
-		display: block;
-		white-space: nowrap;
-	}
-
-	em {
-		font-style: normal;
-	}
-
-	small small { 
-		display: block;
-		margin-top: -0.6em;
-	}
-}
-
-p { 
-	color: #333; 
-	white-space: pre-line;
-}
-
-input { color: #ccc; }
-.input-group {
-	margin-bottom: 15px; 
-
- 	.input-group-addon {
- 		border-left: none;
- 		background: white;
- 		font-size: 0.8em;
- 		font-style: italic;
- 	}
- 	input { border-right: none;}
 }

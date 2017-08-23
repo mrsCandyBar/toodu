@@ -31,7 +31,6 @@ class Home {
                     });
 
             } else {
-                console.log('account >>>', $scope.hasAccount);
                 if ($scope.hasAccount === false) {
                     Firebase.createUser($rootScope, $scope.user).then(
                         (response) => {
@@ -42,7 +41,6 @@ class Home {
                             });
                         });
                 } else {
-                    console.log('account >>> yes', $scope.hasAccount);
                     Firebase.createGroup($rootScope, $scope.user).then(
                         (response) => {
                             $location.path('group');

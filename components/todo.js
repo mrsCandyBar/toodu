@@ -183,7 +183,7 @@ angular
                             title: $scope.task.title,
                             id: $scope.task.id,
                             location: $scope.task.isActive === true ? 'active' : $scope.task.move.location,
-                            group: $scope.user.group
+                            group: $scope.task.group
                         },
                         message: messageData
                     }
@@ -253,6 +253,11 @@ angular
 
                     return UserMembers;
 
+                }
+
+                $scope.showReply = function(commentVisibility) {
+                    console.log('comment >>>', commentVisibility);
+                    commentVisibility.visible = commentVisibility.visible ? false: true;
                 }
 
             },

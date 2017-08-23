@@ -1,61 +1,48 @@
 <article class="contentHolder" ng-if="userIsSignedIn">
 
-    {{ user.name }}
-    <p>{{ user.description }}</p>
-    <p>{{ user.email }}</p>
+    <section>
+        <h1>{{ user.name }}</h1>
+        <p class="edit"
+           ng-model="user.description"
+           contenteditable="true">{{ user.description }}</p>
+        <p>{{ user.email }}</p>
+    </section>
 
     <!-- Users -->
     <section>
-        <h3>Members</h3>
+        <h4>Members</h4>
         <ul>
-            <li ng-repeat="member in user.members.active">{{ member.name }} (<i>{{ member.email }}</i>) <a ng-click="memberRequest('remove', member)">remove</a></li>
+            <li ng-repeat="member in user.members.active">
+                {{ member.name }} (<i>{{ member.email }}</i>)
+                <a ng-click="memberRequest('remove', member)">remove</a></li>
         </ul>
 
-        <h5>Pending</h5>
-        <ul>
-            <li ng-repeat="member in user.members.requests">{{ member.name }} (<i>{{ member.email }}</i>)
-                <a ng-click="memberRequest('accept', member)">accept</a> | <a ng-click="memberRequest('decline', member)">decline</a></li>
-        </ul>
+        <div ng-show="user.members.requests">
+            <h5>New Recruits</h5>
+            <ul>
+                <li ng-repeat="member in user.members.requests">
+                    {{ member.name }} (<i>{{ member.email }}</i>)
+                    <a ng-click="memberRequest('accept', member)">accept</a> |
+                    <a ng-click="memberRequest('decline', member)">decline</a></li>
+            </ul>
+        </div>
     </section>
 
-    <br><br>
     <!-- Tasks -->
-    <section class="contentHolder__btn-holder"><!-- ng-show="allTasks && allTasks.length > 0"-->
-        Active
-        <ul class="taskList">
-            <li ng-repeat="thisTask in tasks.active" class="taskList__holder" ng-click="view('active', thisTask.id)">
-                <a 	class="taskList__holder--title status__{{ thisTask.status}} urgency__{{ thisTask.urgency }}">
-                    {{ thisTask.title }}
-                </a><br>
-                <div class="taskList__holder--user status__{{ thisTask.status }} urgency__{{ thisTask.urgency }}">
-                    {{ thisTask.username }}
-                    (<i>{{ thisTask.status }}</i>) </div>
-            </li>
-        </ul>
+    <section>
+        <h4>Current Events</h4>
+        <div ng-repeat="taskState in tasks">
+            <h6>{{ taskState.name }}</h6>
+            <ul>
+                <li ng-repeat="task in taskState.tasks"
+                    ng-click="view('active', thisTask.id)">
 
-        Hold
-        <ul class="taskList">
-            <li ng-repeat="thisTask in tasks.hold" class="taskList__holder" ng-click="view('hold', thisTask.id)">
-                <a 	class="taskList__holder--title status__{{ thisTask.status}} urgency__{{ thisTask.urgency }}">
-                    {{ thisTask.title }}
-                </a><br>
-                <div class="taskList__holder--user status__{{ thisTask.status }} urgency__{{ thisTask.urgency }}">
-                    {{ thisTask.username }}
-                    (<i>{{ thisTask.status }}</i>) </div>
-            </li>
-        </ul>
-
-        Complete
-        <ul class="taskList">
-            <li ng-repeat="thisTask in tasks.complete" class="taskList__holder" ng-click="view('complete', thisTask.id)">
-                <a 	class="taskList__holder--title status__{{ thisTask.status}} urgency__{{ thisTask.urgency }}">
-                    {{ thisTask.title }}
-                </a><br>
-                <div class="taskList__holder--user status__{{ thisTask.status }} urgency__{{ thisTask.urgency }}">
-                    {{ thisTask.username }}
-                    (<i>{{ thisTask.status }}</i>) </div>
-            </li>
-        </ul>
+                    <a>{{ task.title }}</a>
+                    <a ng-if="task.username">{{ task.username }}</a>
+                    <i>({{ task.status }})</i>
+                </li>
+            </ul>
+        </div>
     </section>
 
     <!-- Group Chat -->

@@ -1,7 +1,7 @@
 class TodoModel {
 
 	constructor(rawObj) {
-		this.id = '';
+		this.id = 0;
 		this.createdby = {
 			name: '',
 			id: '',

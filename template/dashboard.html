@@ -1,49 +1,69 @@
 <article class="contentHolder" ng-if="userIsSignedIn">
 
-	<menu>
-		<li>
-			<h5>My Tasks</h5>
-			<ul class="taskList">
-				<li ng-repeat="thisTask in user.tasks" class="taskList__holder" ng-click="view(thisTask.task.location, thisTask.id)">
-					<div >{{ thisTask.task.title }} (started {{ thisTask.started | fromNow }})</div>
-				</li>
-			</ul>
-		</li>
+	<!-- User Menu : Tasks Signed To | Messages | Logout -->
+	<header>
+		<menu class="btn-group" role="group" aria-label="...">
+			<menuitem class="btn btn-default" ng-click="tasksVisible = !tasksVisible">
+				My Tasks
+				<ul class="taskList" ng-show="tasksVisible">
+					<li ng-repeat="thisTask in user.tasks"
+						ng-click="view(thisTask.task.location, thisTask.id)"
+						class="taskList__holder" >
+						<div >{{ thisTask.task.title }} (started {{ thisTask.started | fromNow }})</div>
+					</li>
+				</ul>
+			</menuitem>
+			<menuitem class="btn btn-default" ng-click="messagesVisible = !messagesVisible">
+				Messages
+				<ul class="taskList" ng-show="messagesVisible">
+					<li ng-repeat="task in user.notify"
+						class="taskList__holder">
+						<div ng-repeat="note in task">
+							<h5 ng-if="$index === 0"
+								ng-click="view(note.task.location, note.task.id)">
+								{{ note.task.title}}</h5>
+							<note>
+								<p ng-click="view(note.task.location, note.task.id)">{{ note.message }}</p>
+								<span>{{ note.date | fromNow }}</span>
+								<span class="btn btn-xs btn-default"
+									  ng-click="removeNote(note)">remove note</span>
+							</note>
+						</div>
+					</li>
+				</ul>
+			</menuitem>
 
-		<li>
-			<h5>Messages</h5>
-			<ul class="taskList">
-				<li ng-repeat="task in user.notify" class="taskList__holder">
-					<div ng-repeat="note in task">
-						<h5 ng-if="$index === 0" ng-click="view(note.task.location, note.task.id)">{{ note.task.title}}</h5>
-						<note>
-							<p ng-click="view(note.task.location, note.task.id)">{{ note.message }}</p>
-							<span>{{ note.date | fromNow }}</span>
-							<span class="btn btn-xs btn-default"
-								  ng-click="removeNote(note)">
-								remove note</span>
-						</note>
-					</div>
-				</li>
-			</ul>
-		</li>
+			<menuitem class="btn btn-default" ng-click="logout()">Logout</menuitem>
+		</menu>
+	</header>
 
-		<li ng-click="logout()">Logout</li>
-	</menu>
+	<!-- User Intro -->
+	<section>
+		<div ng-show="!userEdit">
+			<h1>{{ user.name }}
+				<a ng-click="userEdit = true" class="btn btn-xs btn-default">Edit</a></h1>
+			<h3>{{ user.email }}</h3>
+			<p>{{ user.description }}</p>
+		</div>
 
-	<h1 ng-show="user.name">
-		<small>Welcome</small>
-		<span>{{ user.name }}</span>
+		<div ng-show="userEdit">
+			<h1 ng-model="user.update.name" contenteditable="true" class="edit"></h1>
+			<p ng-model="user.update.description" contenteditable="true" class="edit"></p>
+			<a ng-click="updateUserDetails(user); userEdit = false" class="btn btn-xs btn-default">Update</a>
+			<a ng-click="userEdit = false" class="btn btn-xs btn-default">Cancel</a>
+		</div>
+	</section>
 
-		<small>
-			{{ user.email }}<br>
+	<!-- Groups -->
+	<section>
+		<h4>Groups</h4>
+		<h4>Tasks :
 			{{ user.group.active.id != user.id ? user.group.active.name : 'Personal' }}
+		</h4>
 
-			<a  ng-show="user.group.active.id != user.id"
-				ng-click="switchGroup()"
-				class="btn btn-xs btn-default">personal</a>
-
-			<div ng-if="user.group.list" ng-repeat="group in user.group.list">
+		<div ng-if="user.group.list">
+			<h6>Groups I am a member of:</h6>
+			<div ng-repeat="group in user.group.list" ng-if="user.group.active.id != group.id">
 				<a ng-click="switchGroup(group)"
 				   class="btn btn-xs btn-default">
 					{{ group.name }}</a>
@@ -53,75 +73,60 @@
 					remove
 				</a>
 			</div>
-		</small>
 
-		<div>
-			<h5>Join another group?</h5>
-			<div>
+			<a  ng-show="user.group.active.id != user.id"
+				ng-click="switchGroup()"
+				class="btn btn-xs btn-default">personal</a>
+		</div>
+
+		<!-- Other Group Search -->
+		<section>
+			<h6>Join another group?</h6>
+			<div class="input-group">
+				<input type="email" class="form-control" ng-model="group.email" placeholder="Add Group Email here...">
+				<a class="input-group-addon" ng-click="findGroup(group.email)">find</a>
+			</div>
+
+			<div ng-show="allGroups.length > 0">
+				<h6>Is this the group you wanna join?</h6>
 				<a ng-repeat="group in allGroups"
 				   ng-click="sendMemberRequest(group.id)"
 				   class="btn btn-xs btn-default">
 					{{ group.name }} {{ group.joined === true ? '(joined)' : '' }}</a>
 			</div>
-		</div>
-
-
-		<p ng-model="user.update.name" contenteditable="true"></p>
-		<p ng-model="user.update.group" contenteditable="true"></p>
-		<a ng-click="updateUserDetails(user)" class="btn btn-xs btn-default">Update</a>
-	</h1>
-
-	<h1 ng-show="allTasks && allTasks.length > 0"
-		class="ucase">
-		{{ user.group }}'s Task List
-			<a ng-show="allTasks" href="index.html#!/dashboard/create" class="btn btn-primary">
-				create task</a></h1>
-
-
-	<section class="contentHolder__btn-holder"><!-- ng-show="allTasks && allTasks.length > 0"-->
-		Active
-		<ul class="taskList">
-			<li ng-repeat="thisTask in allTasks.active" class="taskList__holder" ng-click="view('active', thisTask.id)">
-				<a 	class="taskList__holder--title status__{{ thisTask.status}} urgency__{{ thisTask.urgency }}">
-					{{ thisTask.title }}
-				</a><br>
-				<div class="taskList__holder--user status__{{ thisTask.status }} urgency__{{ thisTask.urgency }}">
-					{{ thisTask.username }}
-					(<i>{{ thisTask.status }}</i>) </div>
-			</li>
-		</ul>
-
-		Hold
-		<ul class="taskList">
-			<li ng-repeat="thisTask in allTasks.hold" class="taskList__holder" ng-click="view('hold', thisTask.id)">
-				<a 	class="taskList__holder--title status__{{ thisTask.status}} urgency__{{ thisTask.urgency }}">
-					{{ thisTask.title }}
-				</a><br>
-				<div class="taskList__holder--user status__{{ thisTask.status }} urgency__{{ thisTask.urgency }}">
-					{{ thisTask.username }}
-					(<i>{{ thisTask.status }}</i>) </div>
-			</li>
-		</ul>
-
-		Complete
-		<ul class="taskList">
-			<li ng-repeat="thisTask in allTasks.complete" class="taskList__holder" ng-click="view('complete', thisTask.id)">
-				<a 	class="taskList__holder--title status__{{ thisTask.status}} urgency__{{ thisTask.urgency }}">
-					{{ thisTask.title }}
-				</a><br>
-				<div class="taskList__holder--user status__{{ thisTask.status }} urgency__{{ thisTask.urgency }}">
-					{{ thisTask.username }}
-					(<i>{{ thisTask.status }}</i>) </div>
-			</li>
-		</ul>
+		</section>
 	</section>
 
+	<!-- Tasks -->
+	<section>
+		<h3>Active Group</h3>
+		<h3 ng-show="!allTasks"><br>Loading</h3>
 
-	<h3 ng-show="allTasks.length === 0"><br>No Todos for Today
-		<a href="index.html#!/dashboard/create" class="btn btn-primary">
-			create a new task</a>
-	</h3>
-	<h3 ng-show="!allTasks"><br>Loading</h3>
+		<div ng-show="allTasks && allTasks.length === 0">
+			<h3><br>No Tasks for {{ user.group.active.name }}
+				<a href="index.html#!/dashboard/create" class="btn btn-primary">
+					create a new task</a></h3>
+		</div>
+
+		<div ng-show="allTasks && allTasks.length > 0">
+			<h3>{{ user.group ? user.group.active.name : '' }}
+				<a href="index.html#!/dashboard/create" class="btn btn-primary">new task</a>
+			</h3>
+
+			<div ng-repeat="taskState in allTasks">
+				<h6>{{ taskState.name }}</h6>
+				<ul>
+					<li ng-repeat="task in taskState.tasks"
+						ng-click="view(taskState.name, task.id)">
+
+						<a>{{ task.title }}</a>
+						<a ng-if="task.username">{{ task.username }}</a>
+						<i>({{ task.status }})</i>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</section>
 
 	<todo model="currentTask" filters="taskFilters" member="user"></todo>
 

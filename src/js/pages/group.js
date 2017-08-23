@@ -1,3 +1,4 @@
+import TodoModel from '../todo/todo_model.js';
 
 class Group {
 
@@ -41,7 +42,7 @@ class Group {
                 // Listen for task updates
                 $scope.$on('userTasksUpdated', function (event, data) {
                     function _returnTasks(data) {
-                        Firebase.tasks = data;
+                        Firebase.tasks = _retrieveTodos(data);
                         $scope.tasks = Firebase.tasks;
                     }
 
@@ -108,3 +109,28 @@ class Group {
 }
 
 module.exports = Group;
+
+function _retrieveTodos(rawObj) {
+    if (rawObj && rawObj !== null && typeof rawObj === 'object') {
+        let buildMap = [];
+
+        Object.keys(rawObj).forEach((state) => {
+            buildMap[buildMap.length] = {
+                name: state, // States will always be : active|hold|complete
+                tasks: []
+            };
+
+            let stateMap = buildMap[buildMap.length - 1];
+            Object.keys(rawObj[state]).forEach((task) => {
+                let currentTodo = rawObj[state][task];
+                let buildTask = stateMap['tasks'];
+
+                buildTask[buildTask.length] = new TodoModel(currentTodo);
+            })
+        });
+
+        return buildMap;
+
+    } else {
+        return []; }
+}

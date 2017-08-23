@@ -1,4 +1,5 @@
 import TodoControls from '../todo/todo_controls.js';
+import TodoModel from '../todo/todo_model.js';
 
 class Dashboard {
 
@@ -14,7 +15,7 @@ class Dashboard {
 
         } else {
 
-            function currentRoute() {
+            function _currentRoute() {
                 let route = 'dashboard';
                 if ($route.current.params.id) {
                     route = {
@@ -27,7 +28,7 @@ class Dashboard {
                 }
                 return route;
             }
-            let activeRoute = currentRoute();
+            let activeRoute = _currentRoute();
             $scope.allFilters = Store.allFilters;
             $scope.allTasks = Store.allTasks;
             $scope.currentTask = Store.currentTask;
@@ -36,11 +37,15 @@ class Dashboard {
             $scope.user = Store.user ? Store.user : {};
 
             if (Store.user) {
+                // Runs after init page load when navigating to other pages
                 if (activeRoute && activeRoute.location) {
                     $scope.currentTask = TodoControls.retrieveSingleTodo(activeRoute, $scope.allTasks);
+                    $scope.currentTask.editable = false;
                     Store.currentTask = $scope.currentTask;
+
                 } else {
                     $scope.currentTask = TodoControls.createTodo($scope.user);
+                    console.log('currentTask >>>', $scope.currentTask);
                 }
             }
 
@@ -67,14 +72,16 @@ class Dashboard {
                         Firebase.user = data;
                         Firebase.searchFilters = {
                             filter: 'group',
-                            value: data.group.active.id ? data.group.active.id : data.id
+                            value: data.group ? data.group.active.id : data.id
                         };
                         $scope.user = Firebase.user;
-                        $scope.user.group.list = _retrieveGroups($scope.user.group.list);
-                        $scope.$broadcast('groupsReturned', $scope.allGroups);
-
-                        Firebase.retrieveGroups($rootScope);
-                        console.log('$scope.user >>>', $scope.user);
+                        if (data.group && data.group.list) {
+                            $scope.user.group.list = _retrieveGroups(data.group && data.group.list ? data.group.list : {});
+                        }
+                        $scope.user.update = {
+                            name: data.name,
+                            description: data.description
+                        }
                         Store.user = $scope.user;
                     }
                 }
@@ -100,12 +107,10 @@ class Dashboard {
             });
 
             $scope.$on('groupsReturned', function(event, groupsReturned) {
-
                 if ($scope.user.group && $scope.user.group.list) {
                     Object.keys(groupsReturned).forEach((group) => {
                         for (let i = 0; i < $scope.user.group.list.length; i++) {
 
-                            console.log('group ids', $scope.user.group.list[i].id, groupsReturned[group].id);
                             if ($scope.user.group.list[i].id === groupsReturned[group].id) {
                                 groupsReturned[group].joined = true;
                             }
@@ -137,17 +142,18 @@ class Dashboard {
             $scope.$on('userTasksUpdated', function (event, data) {
 
                 function _returnTasks(data) {
-                    Firebase.tasks = data;
+                    Firebase.tasks = _retrieveTodos(data);
                     let returnTask = { location: 'active', id: 0 };
                     if (activeRoute && activeRoute.location) {
                         returnTask = activeRoute;
                     }
-                    return TodoControls.retrieveTodos($scope, Firebase, returnTask);
+                    return returnTask;
                 }
 
                 if (!Firebase.tasks) {
 
-                    let updateTasks = _returnTasks(data);
+                    let returnTask = _returnTasks(data);
+                    let updateTasks = TodoControls.retrieveTodos($scope, Firebase, returnTask);;
 
                     $scope.$apply(function () {
                         $scope = updateTasks;
@@ -157,15 +163,20 @@ class Dashboard {
                         Store.otherUsers = $scope.otherUsers;
                         Store.taskFilters = $scope.taskFilters;
                         Store.user = $scope.user;
+
+                        if (activeRoute.location === 'create') {
+                            console.log('TEST!');
+                        }
                     });
 
                 } else {
 
                     function updateDOM() {
-                        let updateTasks = _returnTasks(data)
-                        $scope.allTasks = updateTasks.allTasks;
+                        let returnTask = _returnTasks(data);
+                        $scope.allTasks = _retrieveTodos(data);
                         if (activeRoute === 'create') {
-                            $scope.currentTask = Store.currentTask;
+                            console.log('create')
+                            $scope.currentTask = TodoControls.createTodo($scope.user);
                         }
                         Store.allTasks = $scope.allTasks;
                         Store.currentTask = $scope.currentTask;
@@ -228,6 +239,10 @@ class Dashboard {
                 Firebase.updateUserInfo(user);
             }
 
+            $scope.findGroup = function(email) {
+                Firebase.retrieveGroups($rootScope, email);
+            }
+
             $scope.switchGroup = function(group) {
                 if (group) {
                     $scope.user.hideGroup = '';
@@ -272,4 +287,30 @@ function _retrieveGroups(rawObj) {
 
     } else {
         return []; }
+}
+
+function _retrieveTodos(rawObj) {
+    if (rawObj && rawObj !== null && typeof rawObj === 'object') {
+        let buildMap = [];
+
+        Object.keys(rawObj).forEach((state) => {
+            buildMap[buildMap.length] = {
+                name: state, // States will always be : active|hold|complete
+                tasks: []
+            };
+
+            let stateMap = buildMap[buildMap.length - 1];
+            Object.keys(rawObj[state]).forEach((task) => {
+                let currentTodo = rawObj[state][task];
+                let buildTask = stateMap['tasks'];
+
+                buildTask[buildTask.length] = new TodoModel(currentTodo);
+            })
+        });
+
+        return buildMap;
+
+    } else {
+        return [];
+    }
 }

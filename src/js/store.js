@@ -1,7 +1,7 @@
 class Store {
     constructor() {
         this.allFilters = {};
-        this.allTasks = {};
+        this.allTasks = [];
         this.currentTask = {};
         this.taskFilters = {};
         this.allGroups = {};
