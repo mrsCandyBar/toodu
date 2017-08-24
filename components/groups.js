@@ -32,11 +32,9 @@ angular
                         $scope.allGroups = groupsReturned;
                     });
                 }
-
                 $scope.$on('groupsReturned', function(event, groupsReturned) {
                     sortGroups(groupsReturned);
                 });
-
                 $scope.$on('user.group', function() {
                     sortGroups($scope.allGroups);
                 });

@@ -34,7 +34,10 @@ class Command {
     }
 
     updateUser(database, userData) {
-		database.ref('users/' + userData.id).update({
+	    console.log('userData >>>', userData);
+	    let userLocation = userData.location ? userData.location : 'users';
+
+		database.ref(userLocation + '/' + userData.id).update({
 			name: userData.update.name ? userData.update.name : userData.name,
 			email: userData.update.email ? userData.update.email : userData.email,
             description: userData.update.description ? userData.update.description : userData.description

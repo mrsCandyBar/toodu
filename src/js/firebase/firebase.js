@@ -99,7 +99,6 @@ class Firebase {
     }
 
     retrieveUserInfo($rootScope) {
-        console.log('UserID', this.userID)
         this.database
             .ref('/users/' + this.userID)
             .on('value', function (snapshot) {

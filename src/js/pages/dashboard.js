@@ -52,29 +52,45 @@ class Dashboard {
 
             // UPDATE USER DATA
             $scope.$on('userDataUpdated', function (event, userData) {
-                function replaceAndBackupUserData(data) {
-                    if (($scope.user.group && $scope.user.group.length > 0) &&
-                        data.group.active != $scope.user.group.active) {
-                        location.reload();
 
-                    } else {
-                        let userDataUpdated = new UserModel(data);
-                        Firebase.user = userDataUpdated;
-                        $scope.user = userDataUpdated;
-                        Store.user = userDataUpdated;
-                    }
-                }
-                if (!Firebase.tasks) {
-                    replaceAndBackupUserData(userData);
-                    Firebase.retrieveTasks($rootScope, $scope.user);
+                console.log('user >>>', userData);
 
-                    if (activeRoute === 'welcome') { $location.path('dashboard/'); }
-
+                if (userData.length == 0) {
+                    $location.path('group/');
+                    $route.reload();
                 } else {
-                    if (!$scope.$$phase) {
-                        $scope.$apply(function () { replaceAndBackupUserData(userData); });
+
+                    function replaceAndBackupUserData(data) {
+                        if (($scope.user.group && $scope.user.group.length > 0) &&
+                            data.group.active != $scope.user.group.active) {
+                            location.reload();
+
+                        } else {
+                            let userDataUpdated = new UserModel(data);
+                            Firebase.user = userDataUpdated;
+                            $scope.user = userDataUpdated;
+                            Store.user = userDataUpdated;
+                        }
+                    }
+
+                    if (!Firebase.tasks) {
+                        replaceAndBackupUserData(userData);
+                        Firebase.retrieveTasks($rootScope, $scope.user);
+
+                        if (activeRoute === 'welcome') {
+                            $location.path('dashboard/');
+                        }
+
                     } else {
-                        replaceAndBackupUserData(userData); }
+                        if (!$scope.$$phase) {
+                            $scope.$apply(function () {
+                                replaceAndBackupUserData(userData);
+                            });
+                        } else {
+                            replaceAndBackupUserData(userData);
+                        }
+                    }
+
                 }
             });
             $scope.$on('logout', function(event, data) {
@@ -91,7 +107,6 @@ class Dashboard {
                 }
             });
             $scope.$on('userTasksUpdated', function (event, data) {
-
                 function _returnTasks(data) {
                     Firebase.tasks = _retrieveTodos(data);
                     let returnTask = { location: 'active', id: 0 };
@@ -100,24 +115,18 @@ class Dashboard {
                     }
                     return returnTask;
                 }
-
                 if (!Firebase.tasks) {
-
                     let returnTask = _returnTasks(data);
                     let updateTasks = TodoControls.retrieveTodos($scope, Firebase, returnTask);;
 
                     $scope.$apply(function () {
                         $scope = updateTasks;
-                        Store.allFilters = $scope.allFilters;
-                        Store.allTasks = $scope.allTasks;
-                        Store.currentTask = $scope.currentTask;
-                        Store.otherUsers = $scope.otherUsers;
-                        Store.taskFilters = $scope.taskFilters;
-                        Store.user = $scope.user;
+                        Object.keys(Store).forEach((obj) => {
+                            Store[obj] = $scope[obj];
+                        });
                     });
 
                 } else {
-
                     function updateDOM() {
                         let returnTask = _returnTasks(data);
                         $scope.allTasks = _retrieveTodos(data);
@@ -142,6 +151,9 @@ class Dashboard {
                     }
                 }
             });
+            $scope.$on('updateTaskPane', function(event, data) {
+                $scope.view(data.location, data.id);
+            });
 
 
             // CURRENT TASK UPDATES
@@ -157,7 +169,6 @@ class Dashboard {
                 let reRouteToPath = '' + location + '/' + taskId;
                 $location.path('task/' + reRouteToPath);
             }
-
             function _recoverCurrentTask() {
                 $scope.currentTask = activeRoute.location ? TodoControls.retrieveSingleTodo(activeRoute, $scope.allTasks) : TodoControls.createTodo($scope.user);
                 Store.currentTask = $scope.currentTask;

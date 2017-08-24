@@ -1,8 +1,10 @@
+import TodoControls from '../todo/todo_controls.js';
 import TodoModel from '../todo/todo_model.js';
+import UserModel from '../user_model';
 
 class Group {
 
-    init(Firebase, $rootScope, $scope, $route, $location) {
+    init(Firebase, $rootScope, $scope, $route, $location, Store) {
 
         $scope.userIsSignedIn = window.sessionStorage.password && window.sessionStorage.email ? true : false;
 
@@ -15,12 +17,31 @@ class Group {
         } else {
 
             $scope.$on('userLoggedIn', function (event, user) {
+                Firebase.listenForEvents($rootScope);
+                function _currentRoute() {
+                    let route = 'dashboard';
+                    if ($route.current.params.id) {
+                        route = {
+                            location: $route.current.params.filter,
+                            id: $route.current.params.id
+                        };
+                    }
+                    else if ($route.current.params.filter) {
+                        route = $route.current.params.filter;
+                    }
+                    return route;
+                }
+                let activeRoute = _currentRoute();
+                Object.keys(Store).forEach((obj) => {
+                    $scope[obj] = Store[obj];
+                });
 
                 // Retrieve group info and tasks
                 Firebase.retrieveGroupInfo($rootScope);
                 $scope.$on('groupDataUpdated', function (event, userData) {
                     function _replaceAndBackupUserData(data) {
-                        $scope.user = data;
+                        $scope.user = new UserModel(data);
+                        $scope.user.location = 'groups';
                     }
 
                     if (!Firebase.tasks) {
@@ -30,35 +51,51 @@ class Group {
                     } else {
                         if (!$scope.$$phase) {
                             $scope.$apply(function () {
-                                _replaceAndBackupUserData(userData);
-                            });
+                                _replaceAndBackupUserData(userData); });
 
                         } else {
-                            _replaceAndBackupUserData(userData);
-                        }
+                            _replaceAndBackupUserData(userData); }
                     }
                 });
-                $scope.logout = function () {
+                $scope.$on('logout', function(event, data) {
                     Firebase.logOut().then(() => {
                         location.reload();
                     });
-                }
+                })
 
                 // Listen for task updates
                 $scope.$on('userTasksUpdated', function (event, data) {
                     function _returnTasks(data) {
                         Firebase.tasks = _retrieveTodos(data);
-                        $scope.tasks = Firebase.tasks;
+                        let returnTask = { location: 'active', id: 0 };
+                        if (activeRoute && activeRoute.location) {
+                            returnTask = activeRoute;
+                        }
+                        return returnTask;
                     }
-
                     if (!Firebase.tasks) {
+                        let returnTask = _returnTasks(data);
+                        let updateTasks = TodoControls.retrieveTodos($scope, Firebase, returnTask);;
+
                         $scope.$apply(function () {
-                            _returnTasks(data);
+                            $scope = updateTasks;
+                            Object.keys(Store).forEach((obj) => {
+                                Store[obj] = $scope[obj];
+                            });
                         });
 
                     } else {
                         function updateDOM() {
-                            _returnTasks(data);
+                            let returnTask = _returnTasks(data);
+                            $scope.allTasks = _retrieveTodos(data);
+                            Store.allTasks = $scope.allTasks;
+
+                            if (activeRoute === 'create') {
+                                $scope.currentTask = TodoControls.createTodo($scope.user);
+                                Store.currentTask = $scope.currentTask;
+                            } else {
+                                _recoverCurrentTask();
+                            }
                         }
 
                         if (!$scope.$$phase) {
@@ -68,6 +105,7 @@ class Group {
 
                         } else {
                             updateDOM();
+                            $scope.$broadcast('updateArrayEvent');
                         }
                     }
                 });

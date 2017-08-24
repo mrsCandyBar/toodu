@@ -7,7 +7,6 @@ class TodoControls {
 	    todoList.allTasks = store.tasks;
 
 	    if (taskData.id != 0) {
-	    	console.log('run from retrieved');
             todoList.currentTask = this.retrieveSingleTodo(taskData, todoList.allTasks);
 
             if (todoList.currentTask.status != 'notFound' && todoList.currentTask.comments != 1) {

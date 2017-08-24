@@ -1,15 +1,9 @@
-<article class="contentHolder" ng-if="userIsSignedIn">
+<article class="contentHolder" ng-if="userIsSignedIn" ng-show="user.name">
 
-    <section>
-        <h1>{{ user.name }}</h1>
-        <p class="edit"
-           ng-model="user.description"
-           contenteditable="true">{{ user.description }}</p>
-        <p>{{ user.email }}</p>
-    </section>
+    <user model="user"></user>
 
     <!-- Users -->
-    <section>
+    <section ng-show="user.members.active || user.members.requests">
         <h4>Members</h4>
         <ul>
             <li ng-repeat="member in user.members.active">
@@ -29,21 +23,7 @@
     </section>
 
     <!-- Tasks -->
-    <section>
-        <h4>Current Events</h4>
-        <div ng-repeat="taskState in tasks">
-            <h6>{{ taskState.name }}</h6>
-            <ul>
-                <li ng-repeat="task in taskState.tasks"
-                    ng-click="view('active', thisTask.id)">
-
-                    <a>{{ task.title }}</a>
-                    <a ng-if="task.username">{{ task.username }}</a>
-                    <i>({{ task.status }})</i>
-                </li>
-            </ul>
-        </div>
-    </section>
+    <grouptasks tasks="allTasks" member="user"></grouptasks>
 
     <!-- Group Chat -->
 

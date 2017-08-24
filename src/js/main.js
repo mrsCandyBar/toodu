@@ -4,7 +4,7 @@ import Group from './pages/group.js';
 import Firebase from './firebase/firebase.js';
 import Store from './store.js';
 
-var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'editInHTML', 'dropdownComponent', 'todoComponent', 'userComponent', 'groupsComponent', 'fromNowComponent'])
+var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'editInHTML', 'dropdownComponent', 'fromNowComponent', 'userComponent', 'groupsComponent', 'groupTasksComponent', 'taskComponent'])
 
   .config(function($routeProvider) {
         $routeProvider
@@ -58,5 +58,5 @@ var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'editIn
             Firebase.autoLogin($rootScope, $route);
         }
 
-        new Group().init(Firebase, $rootScope, $scope, $route, $location);
+        new Group().init(Firebase, $rootScope, $scope, $route, $location, Store);
   });

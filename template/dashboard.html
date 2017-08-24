@@ -1,41 +1,4 @@
-<article class="contentHolder" ng-if="userIsSignedIn">
-
-	<!-- User Menu : Tasks Signed To | Messages | Logout -->
-	<header>
-		<menu class="btn-group" role="group" aria-label="...">
-			<menuitem class="btn btn-default" ng-click="tasksVisible = !tasksVisible">
-				My Tasks
-				<ul class="taskList" ng-show="tasksVisible">
-					<li ng-repeat="thisTask in user.tasks"
-						ng-click="view(thisTask.task.location, thisTask.id)"
-						class="taskList__holder" >
-						<div >{{ thisTask.task.title }} (started {{ thisTask.started | fromNow }})</div>
-					</li>
-				</ul>
-			</menuitem>
-			<menuitem class="btn btn-default" ng-click="messagesVisible = !messagesVisible">
-				Messages
-				<ul class="taskList" ng-show="messagesVisible">
-					<li ng-repeat="task in user.notify"
-						class="taskList__holder">
-						<div ng-repeat="note in task">
-							<h5 ng-if="$index === 0"
-								ng-click="view(note.task.location, note.task.id)">
-								{{ note.task.title}}</h5>
-							<note>
-								<p ng-click="view(note.task.location, note.task.id)">{{ note.message }}</p>
-								<span>{{ note.date | fromNow }}</span>
-								<span class="btn btn-xs btn-default"
-									  ng-click="removeNote(note)">remove note</span>
-							</note>
-						</div>
-					</li>
-				</ul>
-			</menuitem>
-
-			<menuitem class="btn btn-default" ng-click="logout()">Logout</menuitem>
-		</menu>
-	</header>
+<article class="contentHolder" ng-if="userIsSignedIn" ng-show="user.name">
 
 	<!-- User Intro -->
 	<user model="user"></user>
@@ -43,38 +6,11 @@
 	<!-- Groups -->
 	<groups model="groups" member="user"></groups>
 
-	<!-- Tasks -->
-	<section>
-		<h3>Active Group</h3>
-		<h3 ng-show="!allTasks"><br>Loading</h3>
+	<!-- Group Tasks -->
+	<grouptasks tasks="allTasks" member="user"></grouptasks>
 
-		<div ng-show="allTasks && allTasks.length === 0">
-			<h3><br>No Tasks for {{ user.group.active.name }}
-				<a href="index.html#!/dashboard/create" class="btn btn-primary">
-					create a new task</a></h3>
-		</div>
-
-		<div ng-show="allTasks && allTasks.length > 0">
-			<h3>{{ user.group ? user.group.active.name : '' }}
-				<a href="index.html#!/dashboard/create" class="btn btn-primary">new task</a>
-			</h3>
-
-			<div ng-repeat="taskState in allTasks">
-				<h6>{{ taskState.name }}</h6>
-				<ul>
-					<li ng-repeat="task in taskState.tasks"
-						ng-click="view(taskState.name, task.id)">
-
-						<a>{{ task.title }}</a>
-						<a ng-if="task.username">{{ task.username }}</a>
-						<i>({{ task.status }})</i>
-					</li>
-				</ul>
-			</div>
-		</div>
-	</section>
-
-	<todo model="currentTask" filters="taskFilters" member="user"></todo>
+	<!-- Current Task -->
+	<task model="currentTask" filters="taskFilters" member="user"></task>
 
 </article>
 

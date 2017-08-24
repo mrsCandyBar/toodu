@@ -26,7 +26,7 @@
               <h1>{{ task.title }}</h1>
               <h4>
                   task owners: {{ task.createdby.name }}
-                      <span ng-if="task.assignee.name != 'available'">, and: {{ task.assignee.name }}
+                      <span ng-if="task.assignee.name != 'available'"> and {{ task.assignee.name }}
                           <span ng-if="task.assignee.id === user.id"
                                 ng-click="accept(false)"
                                 class="btn btn-small btn-primary" >Decline Task</span>

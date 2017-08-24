@@ -1,0 +1,29 @@
+<section>
+    <h3>Active Group</h3>
+    <h3 ng-show="!allTasks"><br>Loading</h3>
+
+    <div ng-show="allTasks && allTasks.length === 0">
+        <h3><br>No Tasks for {{ user.group.active.name }}
+            <a href="index.html#!/dashboard/create" class="btn btn-primary">
+                create a new task</a></h3>
+    </div>
+
+    <div ng-show="allTasks && allTasks.length > 0">
+        <h3>{{ user.group ? user.group.active.name : '' }}
+            <a href="index.html#!/dashboard/create" class="btn btn-primary">new task</a>
+        </h3>
+
+        <div ng-repeat="taskState in allTasks">
+            <h6>{{ taskState.name }}</h6>
+            <ul>
+                <li ng-repeat="task in taskState.tasks"
+                    ng-click="view(taskState.name, task.id)">
+
+                    <a>{{ task.title }}</a>
+                    <a ng-if="task.username">{{ task.username }}</a>
+                    <i>({{ task.status }})</i>
+                </li>
+            </ul>
+        </div>
+    </div>
+</section>

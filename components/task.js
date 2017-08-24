@@ -1,6 +1,6 @@
 angular
-    .module('todoComponent', [])
-    .directive('todo', function() {
+    .module('taskComponent', [])
+    .directive('task', function() {
         return {
             restrict: 'E',
             transclude: true,
@@ -21,12 +21,9 @@ angular
                     });
 
                     // Toggle Task Edit Mode
-                    $scope.$watch('task.status', function () {
-                        if ($scope.task &&
-                            ($scope.task.id && $scope.task.id.length > 0) &&
-                            ($scope.task.status != 'Waiting')) {
-                            let newTask = JSON.stringify($scope.task);
-                            $scope.$emit('newTaskData', newTask);
+                    $scope.$watch('task.status', function (data) {
+                        if (data != '..' && data != undefined) {
+                            $scope.$emit('newTaskData', $scope.task);
                         }
                     });
 
@@ -252,7 +249,7 @@ angular
 
             },
 
-            templateUrl: 'template/todo.html',
+            templateUrl: 'template/task.html',
             replace: true
         }
     });
