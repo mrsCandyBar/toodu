@@ -38,64 +38,10 @@
 	</header>
 
 	<!-- User Intro -->
-	<section>
-		<div ng-show="!userEdit">
-			<h1>{{ user.name }}
-				<a ng-click="userEdit = true" class="btn btn-xs btn-default">Edit</a></h1>
-			<h3>{{ user.email }}</h3>
-			<p>{{ user.description }}</p>
-		</div>
-
-		<div ng-show="userEdit">
-			<h1 ng-model="user.update.name" contenteditable="true" class="edit"></h1>
-			<p ng-model="user.update.description" contenteditable="true" class="edit"></p>
-			<a ng-click="updateUserDetails(user); userEdit = false" class="btn btn-xs btn-default">Update</a>
-			<a ng-click="userEdit = false" class="btn btn-xs btn-default">Cancel</a>
-		</div>
-	</section>
+	<user model="user"></user>
 
 	<!-- Groups -->
-	<section>
-		<h4>Groups</h4>
-		<h4>Tasks :
-			{{ user.group.active.id != user.id ? user.group.active.name : 'Personal' }}
-		</h4>
-
-		<div ng-if="user.group.list">
-			<h6>Groups I am a member of:</h6>
-			<div ng-repeat="group in user.group.list" ng-if="user.group.active.id != group.id">
-				<a ng-click="switchGroup(group)"
-				   class="btn btn-xs btn-default">
-					{{ group.name }}</a>
-
-				<a ng-click="removeGroup(group)"
-				   class="btn btn-xs btn-default">
-					remove
-				</a>
-			</div>
-
-			<a  ng-show="user.group.active.id != user.id"
-				ng-click="switchGroup()"
-				class="btn btn-xs btn-default">personal</a>
-		</div>
-
-		<!-- Other Group Search -->
-		<section>
-			<h6>Join another group?</h6>
-			<div class="input-group">
-				<input type="email" class="form-control" ng-model="group.email" placeholder="Add Group Email here...">
-				<a class="input-group-addon" ng-click="findGroup(group.email)">find</a>
-			</div>
-
-			<div ng-show="allGroups.length > 0">
-				<h6>Is this the group you wanna join?</h6>
-				<a ng-repeat="group in allGroups"
-				   ng-click="sendMemberRequest(group.id)"
-				   class="btn btn-xs btn-default">
-					{{ group.name }} {{ group.joined === true ? '(joined)' : '' }}</a>
-			</div>
-		</section>
-	</section>
+	<groups model="groups" member="user"></groups>
 
 	<!-- Tasks -->
 	<section>

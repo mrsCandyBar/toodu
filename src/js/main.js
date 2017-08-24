@@ -4,7 +4,7 @@ import Group from './pages/group.js';
 import Firebase from './firebase/firebase.js';
 import Store from './store.js';
 
-var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'editInHTML', 'dropdownComponent', 'todoComponent', 'fromNowComponent'])
+var todoApp = angular.module('myApp', ['ngRoute', 'datePickerComponent', 'editInHTML', 'dropdownComponent', 'todoComponent', 'userComponent', 'groupsComponent', 'fromNowComponent'])
 
   .config(function($routeProvider) {
         $routeProvider

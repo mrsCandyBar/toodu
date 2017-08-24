@@ -1,0 +1,42 @@
+<section>
+    <h4>Groups</h4>
+    <h4>Tasks :
+        {{ user.group.active.id != user.id ? user.group.active.name : 'Personal' }}
+    </h4>
+
+    <div ng-if="user.group.list">
+        <h6>Groups I am a member of:</h6>
+        <div ng-repeat="group in user.group.list" ng-if="user.group.active.id != group.id">
+
+            <a ng-if="group.status === 'pending'" class="btn btn-xs btn-primary">{{ group.name }} (pending)</a>
+            <a ng-if="group.status != 'pending'" ng-click="switchGroup(group)" class="btn btn-xs btn-default">{{ group.name }}</a>
+
+            <a ng-if="group.status != 'pending'"
+               ng-click="removeGroup(group)"
+               class="btn btn-xs btn-default">
+                remove
+            </a>
+        </div>
+
+        <a  ng-show="user.group.active.id != user.id"
+            ng-click="switchGroup()"
+            class="btn btn-xs btn-default">personal</a>
+    </div>
+
+    <!-- Other Group Search -->
+    <section>
+        <h6>Join another group?</h6>
+        <div class="input-group">
+            <input type="email" class="form-control" ng-model="group.email" placeholder="Add Group Email here...">
+            <a class="input-group-addon" ng-click="findGroup(group.email)">find</a>
+        </div>
+
+        <div ng-show="allGroups">
+            <h6>Is this the group you wanna join?</h6>
+            <a ng-repeat="group in allGroups"
+               ng-click="group.joined === '(pending)' ? '' : sendMemberRequest(group)"
+               class="btn btn-xs btn-default">
+                {{ group.name }} {{ group.joined ? group.joined : '' }}</a>
+        </div>
+    </section>
+</section>

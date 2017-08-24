@@ -57,12 +57,23 @@ class Command {
 			email: memberRequest.email,
 			id: memberRequest.id
 		});
+
+        database.ref('users/' + memberRequest.id + '/group/list/' + memberRequest.group.id).update({
+            id: memberRequest.group.id,
+            name: memberRequest.group.name,
+            status: 'pending'
+        });
     }
 
     memberRequest(database, groupData) {
-        if (groupData.status === 'remove') {
-            database.ref('groups/' + groupData.id + '/members/active/' + groupData.member.id).remove();
+
+        if (groupData.status === 'remove' || groupData.status === 'decline') {
             database.ref('users/' + groupData.member.id + '/group/list/' + groupData.id).remove();
+            database.ref('groups/' + groupData.id + '/members/active/' + groupData.member.id).remove();
+
+            if (groupData.status === 'decline') {
+                database.ref('groups/' + groupData.id + '/members/requests/' + groupData.member.id).remove();
+            }
 
         } else {
             if (groupData.status === 'accept') {
@@ -74,7 +85,8 @@ class Command {
 
                 database.ref('users/' + groupData.member.id + '/group/list/' + groupData.id).update({
                     name: groupData.name,
-                    id: groupData.id
+                    id: groupData.id,
+                    status: 'accepted'
                 });
             }
             database.ref('groups/' + groupData.id + '/members/requests/' + groupData.member.id).remove();

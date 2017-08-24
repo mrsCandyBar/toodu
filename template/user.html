@@ -1,0 +1,15 @@
+<section>
+    <div ng-show="!userEdit">
+        <h1>{{ user.name }}
+            <a ng-click="userEdit = true" class="btn btn-xs btn-default">Edit</a></h1>
+        <h3>{{ user.email }}</h3>
+        <p>{{ user.description }}</p>
+    </div>
+
+    <div ng-show="userEdit">
+        <h1 ng-model="user.update.name" contenteditable="true" class="edit"></h1>
+        <p ng-model="user.update.description" contenteditable="true" class="edit"></p>
+        <a ng-click="updateUserDetails(user); userEdit = false" class="btn btn-xs btn-default">Update</a>
+        <a ng-click="userEdit = false" class="btn btn-xs btn-default">Cancel</a>
+    </div>
+</section>

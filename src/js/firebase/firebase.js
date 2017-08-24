@@ -16,21 +16,16 @@ class Firebase {
         this.user;
     }
 
-    // If user has not logged out and is still in the same tab
     autoLogin($rootScope, $route) {
         let user = {
             email: window.sessionStorage.email,
-            password: window.sessionStorage.password
-        }
+            password: window.sessionStorage.password }
 
-        this.logIn($rootScope, user).then((response) => {
-            },
+        this.logIn($rootScope, user).then((response) => {},
             (error) => {
-                console.log('auto login failed >>>', error)
-            });
+                console.log('auto login failed >>>', error) });
     }
 
-    // Create a new user
     createUser($rootScope, userData) {
         let createUser = new Promise((resolve, reject) => {
             User.create(userData).then((data) => {
@@ -46,13 +41,11 @@ class Firebase {
             }, (error) => {
                 reject(error.message);
             });
-
         });
 
         return createUser;
     }
 
-    // Create a new group
     createGroup($rootScope, userData) {
         let newGroup = new Promise((resolve, reject) => {
             User.create(userData).then((data) => {
@@ -68,13 +61,10 @@ class Firebase {
             }, (error) => {
                 reject(error.message);
             });
-
         });
-
         return newGroup;
     }
 
-    // Log user in
     logIn($rootScope, user) {
         let logInUser = new Promise((resolve, reject) => {
             Authorize.signIn(this.auth, user).then((data) => {
@@ -94,13 +84,10 @@ class Firebase {
         return logInUser;
     }
 
-    // Log user out
     logOut() {
         let logOutUser = new Promise((resolve, reject) => {
             Authorize.signOut(this.auth).then((data) => {
                 window.sessionStorage.clear();
-
-                this.userID = '';
                 resolve('User logged out successfully');
 
             }, (error) => {
@@ -111,7 +98,6 @@ class Firebase {
         return logOutUser;
     }
 
-    // Get user info
     retrieveUserInfo($rootScope) {
         console.log('UserID', this.userID)
         this.database
@@ -125,24 +111,11 @@ class Firebase {
             });
     }
 
-    // Update user info
-    updateUserInfo(userData) {
-        Command.updateUser(this.database, userData);
-    }
-
-    // Update user group
-    updateUserGroup(userData) {
-        Command.updateUserGroup(this.database, userData);
-    }
-
-    // Get group info
     retrieveGroupInfo($rootScope) {
-        console.log('returns >>>', this.userID);
         this.database
             .ref('/groups/' + this.userID)
             .on('value', function (snapshot) {
                 let userData = snapshot.val() ? snapshot.val() : [];
-                console.log('returns >>>', snapshot);
                 $rootScope.$broadcast('groupDataUpdated', userData);
 
             }, function (err) {
@@ -153,15 +126,6 @@ class Firebase {
     // Update group info
     updateGroupInfo(userData) {
         Command.updateUser(this.database, userData);
-    }
-
-    // Member Request
-    sendMemberRequest(memberRequest) {
-        Command.sendMemberRequest(this.database, memberRequest);
-    }
-
-    removeMember(memberData) {
-        Command.removeMember(this.database, memberData);
     }
 
     memberRequest(groupData) {
@@ -181,49 +145,45 @@ class Firebase {
             });
     }
 
-    retrieveGroups($rootScope, email) {
-        this.database
-            .ref('/groups/')
-            .orderByChild('email')
-            .equalTo(email)
-            .once('value', function (snapshot) {
-                let updates = snapshot.val() ? snapshot.val() : [];
-                $rootScope.$broadcast('groupsReturned', updates);
-
-            }, function (err) {
-                console.log('denied >>>', err);
-            });
-    }
-
-    // update task
-    updateTask(taskData) {
-        Command.updateTask(this.database, taskData);
-    }
-
-    deleteTask(taskData) {
-        Command.deleteTask(this.database, taskData);
-    }
-
-    moveTask(taskData) {
-        Command.moveTask(this.database, taskData);
-        Command.sendUserNotification(this.database, taskData.updateContributers);
-    }
-
-    removeNote(note) {
-        Command.removeSingleUserNote(this.database, note)
-    }
-
     listenForEvents($rootScope) {
         let database = this.database;
 
+        // User
+        $rootScope.$on('updateUserInfo', function(event, userData)          { Command.updateUser(database, userData); });
+        $rootScope.$on('removeNote', function(event, note)                  { Command.removeSingleUserNote(database, note) });
+
         // Task Updates
+        $rootScope.$on('newTaskData', function (event, taskData)            { Command.updateTask(database, taskData); })
         $rootScope.$on('updateMyTasks', function (event, watchTasks)        { Command.updateMyTasks(database, watchTasks, this.userId); });
         $rootScope.$on('updateTaskLocationChange', function (event, taskData) { Command.updateTaskHoldersOfLocationChange(database, taskData); })
+        $rootScope.$on('deleteTask', function (event, taskData)             { Command.deleteTask(database, taskData); })
+        $rootScope.$on('moveTask', function (event, taskData)               {
+            Command.moveTask(this.database, taskData);
+            Command.sendUserNotification(this.database, taskData.updateContributers);
+        });
 
         // Comments
         $rootScope.$on('notifyTaskHolders', function (event, commentData)   { Command.sendUserNotification(database, commentData); });
         $rootScope.$on('addComment', function (event, commentData)          { Command.addReplyAndNotifyCommenter(database, commentData); });
         $rootScope.$on('addReply', function (event, replyData)              { Command.addReplyAndNotifyCommenter(database, replyData); });
+
+        // Groups
+        $rootScope.$on('removeMember', function (event, memberData)         { Command.removeMember(database, memberData); });
+        $rootScope.$on('updateUserGroup', function (event, userData)        { Command.updateUserGroup(database, userData); });
+        $rootScope.$on('sendMemberRequest', function (event, memberRequest) { Command.sendMemberRequest(database, memberRequest); });
+        $rootScope.$on('retrieveGroups', function (event, email)            {
+            database
+                .ref('/groups/')
+                .orderByChild('email')
+                .equalTo(email)
+                .once('value', function (snapshot) {
+                    let updates = snapshot.val() ? snapshot.val() : [];
+                    $rootScope.$broadcast('groupsReturned', updates);
+
+                }, function (err) {
+                    console.log('denied >>>', err);
+                });
+        });
     }
 }
 
